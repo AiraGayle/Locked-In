@@ -1,18 +1,27 @@
-// TODO: install node-cron — npm install node-cron
-// TODO: import cron from 'node-cron'
-// TODO: import pool from '../config/db.js'
+import cron from 'node-cron';
+import { query } from '../config/db.js';
 
-// Scheduled job: clean up empty or expired rooms
-// TODO: define what "expired" means — e.g. no active members for over 1 hour
-//        or room has no members at all (everyone left)
+const closeEmptyRooms = async () => {
+  const result = await query(
+    `UPDATE rooms SET status = 'closed'
+     WHERE status = 'active'
+       AND empty_since IS NOT NULL
+       AND empty_since <= NOW() - INTERVAL '10 minutes'
+     RETURNING id, name`
+  );
 
-// TODO: schedule with cron.schedule('0 * * * *', async () => { ... })
-//        (runs every hour — adjust the cron expression if needed)
+  if (result.rows.length > 0) {
+    console.log(`[cron] Closed ${result.rows.length} empty room(s):`, result.rows.map(r => r.name));
+  }
+};
 
-// Inside the job:
-// TODO: query rooms that have no entries in room_members
-//        OR where all members have been inactive for > 1 hour
-// TODO: delete those rooms (room_members rows should cascade-delete if FK is set up)
-// TODO: log how many rooms were cleaned each run
+const startCleanRoomsJob = () => {
+  cron.schedule('0 * * * *', async () => {
+    console.log('[cron] Running CleanRooms job...');
+    await closeEmptyRooms();
+  });
 
-// Make sure this file is imported in src/index.js so the job registers on startup
+  console.log('[cron] CleanRooms job scheduled (every hour)');
+};
+
+export { startCleanRoomsJob };
