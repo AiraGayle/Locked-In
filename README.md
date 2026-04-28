@@ -77,7 +77,6 @@ focus-room/
 │ │ ├── auth.js
 │ │ ├── rooms.js
 │ │ ├── sessions.js
-│ │ └── stats.js
 │ ├── jobs/
 │ │ └── cleanRooms.js # Cron job — removes empty/expired rooms
 │ ├── middleware/
@@ -86,14 +85,12 @@ focus-room/
 │ │ ├── auth.js
 │ │ ├── rooms.js
 │ │ ├── sessions.js
-│ │ └── stats.js
 │ ├── services/
 │ │ └── websocket.js # WebSocket server + broadcast logic
 │ ├── utils/
 │ │ └── inviteCode.js # Invite code generator
 │ └── index.js # Entry point
 └── frontend/
-
 
 What still needs to be built
 Each file in backend/src/ has inline // TODO comments marking exactly what to implement. Here's the high-level breakdown by feature:
