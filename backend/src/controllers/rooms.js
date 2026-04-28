@@ -1,28 +1,78 @@
-// TODO: import pool from '../config/db.js'
-// TODO: import { generateInviteCode } from '../utils/inviteCode.js'
+import {
+  createRoom, getUserRooms, getRoomById,
+  joinRoom, leaveRoom, closeRoom, removeMember,
+} from '../services/room-service.js';
+import { sendSuccess, sendError } from '../utils/response-utils.js';
 
-// createRoom(req, res)
-// TODO: generate a unique invite code (see utils/inviteCode.js)
-// TODO: insert into rooms table with owner = req.user.userId
-// TODO: also insert owner into room_members table
-// TODO: return 201 with room details and invite code
+const getAllRooms = async (req, res) => {
+  try {
+    const rooms = await getUserRooms(req.user.userId);
+    return sendSuccess(res, rooms, 200);
+  } catch (err) {
+    return sendError(res, 500, err.message);
+  }
+};
 
-// joinRoom(req, res)
-// TODO: find room by invite code from req.body.inviteCode
-// TODO: return 404 if room not found
-// TODO: check if user is already a member — return 409 if so
-// TODO: insert user into room_members table
-// TODO: return room details
+const createNewRoom = async (req, res) => {
+  const { name } = req.body;
+  if (!name) return sendError(res, 400, 'Room name is required');
+  try {
+    const room = await createRoom({ name, hostId: req.user.userId });
+    return sendSuccess(res, room, 201);
+  } catch (err) {
+    return sendError(res, 500, err.message);
+  }
+};
 
-// getRoom(req, res)
-// TODO: query room by roomId, join with room_members and users
-// TODO: return room info + list of members with their current timer status
+const getRoom = async (req, res) => {
+  try {
+    const room = await getRoomById(req.params.id);
+    return sendSuccess(res, room, 200);
+  } catch (err) {
+    return sendError(res, 404, err.message);
+  }
+};
 
-// leaveRoom(req, res)
-// TODO: delete row from room_members where userId = req.user.userId and roomId matches
-// TODO: if the leaving user is the owner, either transfer ownership or delete the room
+const joinExistingRoom = async (req, res) => {
+  const { inviteCode } = req.body;
+  if (!inviteCode) return sendError(res, 400, 'Invite code is required');
+  try {
+    const room = await joinRoom({ inviteCode, userId: req.user.userId });
+    return sendSuccess(res, room, 200);
+  } catch (err) {
+    return sendError(res, 404, err.message);
+  }
+};
 
-// kickMember(req, res)
-// TODO: verify req.user.userId is the room owner — return 403 if not
-// TODO: delete the target userId from room_members
-// TODO: broadcast a WebSocket event to notify the kicked user
+const leaveExistingRoom = async (req, res) => {
+  try {
+    await leaveRoom({ roomId: req.params.id, userId: req.user.userId });
+    return sendSuccess(res, { message: 'Left room successfully' }, 200);
+  } catch (err) {
+    return sendError(res, 500, err.message);
+  }
+};
+
+const closeExistingRoom = async (req, res) => {
+  try {
+    await closeRoom({ roomId: req.params.id, hostId: req.user.userId });
+    return sendSuccess(res, { message: 'Room closed' }, 200);
+  } catch (err) {
+    return sendError(res, 403, err.message);
+  }
+};
+
+const removeRoomMember = async (req, res) => {
+  try {
+    await removeMember({
+      roomId: req.params.id,
+      targetUserId: req.params.userId,
+      hostId: req.user.userId,
+    });
+    return sendSuccess(res, { message: 'Member removed' }, 200);
+  } catch (err) {
+    return sendError(res, 403, err.message);
+  }
+};
+
+export { getAllRooms, createNewRoom, getRoom, joinExistingRoom, leaveExistingRoom, closeExistingRoom, removeRoomMember };
