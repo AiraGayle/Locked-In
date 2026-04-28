@@ -1,21 +1,81 @@
-// TODO: import bcrypt — npm install bcrypt
-// TODO: import jwt from 'jsonwebtoken'
-// TODO: import pool from '../config/db.js'
 
-// register(req, res)
-// TODO: validate that email and password are present
-// TODO: check if email already exists in users table
-// TODO: hash the password with bcrypt (saltRounds = 10)
-// TODO: insert new user into users table
-// TODO: sign a JWT with { userId, email } and process.env.JWT_SECRET
-// TODO: return 201 with the token and basic user info
+import {
+  registerUser,
+  loginUser,
+  getAuthenticatedUser,
+} from '../services/auth-service.js';
+import { AppError } from '../errors/AppError.js';
 
-// login(req, res)
-// TODO: find user by email — return 401 if not found
-// TODO: compare submitted password with stored hash using bcrypt.compare
-// TODO: return 401 if password doesn't match
-// TODO: sign and return a JWT on success
+const sendSuccess = (res, data, statusCode = 200) =>
+  res.status(statusCode).json({ success: true, data });
 
-// getMe(req, res)
-// TODO: use req.user.userId (set by authenticate middleware) to query the user
-// TODO: return user info (exclude password hash)
+const sendError = (res, statusCode, message) =>
+  res.status(statusCode).json({ success: false, message });
+
+// --- Validation helpers ---
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+const validateRegisterInput = ({ username, email, password }) => {
+  if (!username || !email || !password)
+    return 'Username, Email, and Password are required';
+  if (!isValidEmail(email))
+    return 'Invalid email format';
+  if (password.length < 6)
+    return 'Password must be at least 6 characters';
+  return null;
+};
+
+const validateLoginInput = ({ email, password }) => {
+  if (!email || !password)
+    return 'Email and Password are required';
+  return null;
+};
+
+// --- Controllers ---
+export const register = async (req, res) => {
+  const error = validateRegisterInput(req.body);
+  if (error) return sendError(res, 400, error);
+
+  try {
+    const { username, email, password } = req.body;
+    const result = await registerUser({ username, email, password });
+    return sendSuccess(res, result, 201);
+  } catch (err) {
+    console.error('Register error:', err);
+    const status = err instanceof AppError ? err.statusCode : 500;
+    const message = err instanceof AppError ? err.message : 'Internal server error';
+    return sendError(res, status, message);
+  }
+};
+
+export const login = async (req, res) => {
+  const error = validateLoginInput(req.body);
+  if (error) return sendError(res, 400, error);
+
+  try {
+    const { email, password } = req.body;
+    const result = await loginUser({ email, password });
+    return sendSuccess(res, result);
+  } catch (err) {
+    const status = err instanceof AppError ? err.statusCode : 500;
+    const message = err instanceof AppError ? err.message : 'Internal server error';
+    return sendError(res, status, message);
+  }
+};
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await getAuthenticatedUser(req.user.userId);
+    return sendSuccess(res, user);
+  } catch (err) {
+    const status = err instanceof AppError ? err.statusCode : 500;
+    const message = err instanceof AppError ? err.message : 'Internal server error';
+    return sendError(res, status, message);
+  }
+};
+
+export const logout = (_req, res) => {
+  // Stateless JWT — invalidation is client-side (drop the token).
+  // For server-side invalidation, add a token blocklist here.
+  return sendSuccess(res, { message: 'Logged out successfully' });
+};

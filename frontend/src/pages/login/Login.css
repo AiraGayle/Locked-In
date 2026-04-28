@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+
+.login-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+ 
+  flex-direction: column; 
+
+  background-color: #262624;
+}
+
+
+
+.login-page__banner {
+  width: 90%;
+  height: 72px;
+  background: #45453C;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.login-page__card {
+  background: #262624;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 480px;
+  animation: cardIn 0.35s ease both;
+  margin-top: 50px;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-page__tabs {
+  display: flex;
+  border: 1px solid #FFFFFF;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.login-page__tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: none;
+  border-radius: 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.login-page__tab:first-child {
+  border-right: 1px solid var(--color-border);
+}
+
+.login-page__tab--active {
+  background: #326CA6;
+  color: #FFFFFF;
+}
+
+.login-page__tab:not(.login-page__tab--active):hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-input);
+}
+
+.login-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: formIn 0.2s ease both;
+}
+
+@keyframes formIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-page__error {
+  font-size: 13px;
+  color: var(--color-danger);
+  text-align: center;
+  padding: 6px 10px;
+  background: rgba(224, 112, 112, 0.07);
+  border-left: 2px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  animation: errIn 0.15s ease both;
+}
+
+@keyframes errIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.login-page__submit {
+  background: #326CA6;
+  color: #FFFFFF;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid #FFFFFF;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+
+}
+
+.login-page__submit:hover:not(:disabled) {
+  background:  #326CA6;
+}
+
+.login-page__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  color: #FFFFFF;
+  
+}
+.form-field input {
+  width: 100%;
+  padding: 10px 12px;
+
+  border-radius: 8px; 
+  border: 0.5px solid #FFFFFF;
+
+  background: #30302E;
+  color: var(--color-text-primary);
+
+  font-size: 14px;
+  outline: none;
+
+  transition: 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
