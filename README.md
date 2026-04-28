@@ -93,9 +93,7 @@ focus-room/
 │ │ └── inviteCode.js # Invite code generator
 │ └── index.js # Entry point
 └── frontend/
-├── public/
-└── src/
-├── assets/
+
 
 What still needs to be built
 Each file in backend/src/ has inline // TODO comments marking exactly what to implement. Here's the high-level breakdown by feature:
