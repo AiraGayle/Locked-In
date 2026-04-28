@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-//import RoomCard from '../../components/room-card/RoomCard.jsx';
-//import CreateRoomModal from '../../components/modal/CreateRoomModal.jsx';
-//import JoinRoomModal from '../../components/modal/JoinRoomModal.jsx';
-//import { getRooms, createRoom, joinRoom } from '../../services/room-service.js';
-//import { getStats } from '../../services/session-service.js';
-//import { logout } from '../../services/auth-service.js';
-//import { formatDuration } from '../../utils/date-utils.js';
-//import { useActiveSessions } from '../../hooks/useActiveSessions.js';
+import RoomCard from '../../components/room-card/RoomCard.jsx';
+import CreateRoomModal from '../../components/modal/CreateRoomModal.jsx';
+import JoinRoomModal from '../../components/modal/JoinRoomModal.jsx';
+import { getRooms, createRoom, joinRoom } from '../../services/room-service.js';
+import { getStats } from '../../services/session-service.js';
+import { logout } from '../../services/auth-service.js';
+import { formatDuration } from '../../utils/date-utils.js';
+import { useActiveSessions } from '../../hooks/useActiveSessions.js';
 import './dashboard.css';
 
 const StatCard = ({ label, value }) => (
