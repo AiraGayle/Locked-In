@@ -1,0 +1,169 @@
+.dashboard-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.dashboard-page__logo {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dashboard-page__header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dashboard-page__nav-btn {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: 8px 16px;
+}
+
+.dashboard-page__nav-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-light);
+}
+
+.dashboard-page__logout-btn {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  padding: 8px 16px;
+}
+
+.dashboard-page__main {
+  flex: 1;
+  padding: 2rem 1.5rem;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.dashboard-page__welcome {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-page__stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-page__stat-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-page__stat-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.dashboard-page__stat-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.dashboard-page__rooms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dashboard-page__rooms-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dashboard-page__rooms-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dashboard-page__join-btn {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.dashboard-page__join-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-light);
+}
+
+.dashboard-page__create-btn {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.dashboard-page__create-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.dashboard-page__rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.dashboard-page__loading,
+.dashboard-page__empty {
+  padding: 3rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-page__error {
+  font-size: 13px;
+  color: var(--color-danger);
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 600px) {
+  .dashboard-page__header {
+    padding: 1rem;
+  }
+
+  .dashboard-page__main {
+    padding: 1.5rem 1rem;
+  }
+
+  .dashboard-page__stats-section {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboard-page__rooms-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
