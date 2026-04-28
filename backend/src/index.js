@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
 // TODO: import http from 'http' and create server for WebSocket support
 // TODO: import { initWebSocket } from './services/websocket.js'
 // TODO: import authRoutes from './routes/auth.js'
@@ -23,13 +22,11 @@ app.use(express.json());
 // app.use('/api/sessions', sessionRoutes);
 // app.use('/api/stats', statsRoutes);
 
-app.use('/api/auth', authRoutes);
-
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // TODO: replace app.listen with server.listen so WebSocket can share the same port
 app.listen(PORT, () => {
