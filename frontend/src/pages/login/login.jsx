@@ -1,69 +1,122 @@
-import { useState } from "react";
-import "./Login.css";
+import { useState } from 'react';
+import './Login.css';
 
+import { register, login } from '../../services/auth-service.js';
 
-export default function Login({ onLogin }) {
- 
-  const [form, setForm] = useState({ email: "", password: "" });
+export default function LoginPage() {
+  const [tab, setTab] = useState('login');
+  const [form, setForm] = useState({ username: '', email: '', password: '' });
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError('');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (loading) return;
+  const handleTabSwitch = (t) => {
+    setTab(t);
+    setForm({ username: '', email: '', password: '' });
+    setError('');
+  };
+
+  const handleSubmit = async () => {
     setLoading(true);
-    setError("");
-
+    setError('');
     try {
-      const res = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const result = await res.json();
-
-      if (result.token) {
-        onLogin(result); // App handles navigation
+      if (tab === 'login') {
+        await login({ email: form.email, password: form.password });
       } else {
-        setError(result.message || "Login failed");
+        await register({ username: form.username, email: form.email, password: form.password });
       }
+      window.location.href = '/dashboard';
     } catch (err) {
-      setError("Network error - please try again");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleSubmit();
+  };
+
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <div className="login-left">
-          <h1>Welcome Back</h1>
+    <div className="login-page" style={{ width: "100vw", height: "100vh" }}>
+
+       {/* Banner */}
+      <div className="login-page__banner" />
+      <div className="login-page__card">
+
+       
+
+        {/* Tabs */}
+        <div className="login-page__tabs">
+          <button
+            className={`login-page__tab ${tab === 'login' ? 'login-page__tab--active' : ''}`}
+            onClick={() => handleTabSwitch('login')}
+          >
+            LOGIN
+          </button>
+          <button
+            className={`login-page__tab ${tab === 'register' ? 'login-page__tab--active' : ''}`}
+            onClick={() => handleTabSwitch('register')}
+          >
+            REGISTER
+          </button>
         </div>
-        <div className="login-right">
-          <h2>Login</h2>
-          {error && <div className="error-message">{error}</div>}
-          <form onSubmit={handleSubmit}>
-            <input name="email" type="email" placeholder="Email"
-              value={form.email} onChange={handleChange} required disabled={loading} />
-            <input name="password" type="password" placeholder="Password"
-              value={form.password} onChange={handleChange} required disabled={loading} />
-            <button type="submit" disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </form>
-          <p className="register-text">
-              No account?{" "}
-              <span onClick={() => window.location.href = '/register'} style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}>
-                Register
-              </span>
-            </p>
+
+        {/* Form */}
+        <div className="login-page__form" onKeyDown={handleKeyDown}>
+          {tab === 'register' && (
+            <div className="form-field">
+              <label htmlFor="username">Username:</label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                value={form.username}
+                onChange={handleChange}
+                autoComplete="username"
+              />
+            </div>
+          )}
+
+          <div className="form-field">
+            <label htmlFor="email">Email:</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              autoComplete="email"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="password">Password:</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
+            />
+          </div>
+
+          {error && <p className="login-page__error">{error}</p>}
+
+          <button
+            className="login-page__submit"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? 'Please wait...' : tab === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}
+          </button>
         </div>
+
       </div>
     </div>
   );
