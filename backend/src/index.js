@@ -2,13 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
+import { startCleanRoomsJob } from './jobs/clean-rooms';
 // TODO: import http from 'http' and create server for WebSocket support
 // TODO: import { initWebSocket } from './services/websocket.js'
 // TODO: import authRoutes from './routes/auth.js'
 // TODO: import roomRoutes from './routes/rooms.js'
 // TODO: import sessionRoutes from './routes/sessions.js'
 // TODO: import statsRoutes from './routes/stats.js'
-// TODO: import './jobs/cleanRooms.js' to register the cron job on startup
 
 dotenv.config();
 
@@ -35,4 +35,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   // TODO: call initWebSocket(server) here
+  startCleanRoomsJob();
 });
