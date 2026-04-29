@@ -80,7 +80,6 @@
     padding: 14px;
   }
 
-  /* tighter header */
   .sessions-card__table-header {
     grid-template-columns: 1.5fr 1fr 1fr;
     gap: 6px;
@@ -92,7 +91,6 @@
     letter-spacing: 0.08em;
   }
 
-  /* rows stay grid (IMPORTANT) */
   .sessions-card__row {
     grid-template-columns: 1.5fr 1fr 1fr;
     gap: 6px;
@@ -114,7 +112,6 @@
     font-size: 12px;
   }
 
-  /* make duration stand out but smaller */
   .sessions-card__cell--highlight {
     font-size: 12px;
   }

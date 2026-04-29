@@ -1,8 +1,8 @@
 import Navbar from '../../components/navbar/Navbar';
 import StatCard from '../../components/stat-card/StatCard';
-import ProfileCard from './ProfileCard';
-import ChartCard from './ChartCard';
-import SessionsCard from './SessionsCard';
+import ProfileCard from '../../card/ProfileCard'
+import ChartCard from '../../card/ChartCard';
+import SessionsCard from '../../card/SessionsCard';
 import './stats.css';
 import { Timer, Flame, Check } from "lucide-react";
 
