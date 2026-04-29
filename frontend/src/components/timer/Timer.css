@@ -31,11 +31,12 @@
 }
 
 .timer__display {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 600;
   font-family: var(--font-mono);
   color: var(--color-text-primary);
   letter-spacing: -1px;
+  white-space: nowrap;
   z-index: 1;
 }
 
@@ -65,6 +66,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.timer__edit-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .timer__edit-input {

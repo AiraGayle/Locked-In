@@ -4,7 +4,7 @@ const formatDuration = (seconds) => {
   const secs = Math.floor(seconds % 60);
 
   if (hrs > 0) {
-    return `${hrs}h ${String(mins).padStart(2, '0')}m`;
+    return `${hrs}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
   }
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 };

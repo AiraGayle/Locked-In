@@ -118,7 +118,7 @@ const Room = ({ user, roomId, onNavigate }) => {
       )}
 
       <header className="room__header">
-        <button className="room__back-btn" onClick={() => onNavigate('/dashboard')}>
+        <button className="room__back-btn" onClick={() => {onNavigate('/dashboard'); handleTimerCancel();}}>
           Back
         </button>
         <div className="room__header-center">
@@ -140,8 +140,7 @@ const Room = ({ user, roomId, onNavigate }) => {
             onCancel={handleTimerCancel}
             initialTargetSeconds={timerState.targetSeconds}
             initialSecondsLeft={timerState.secondsLeft}
-            initialIsRunning={timerState.isRunning}
-            initialHasStarted={timerState.hasStarted}
+            initialMode={timerState.mode}
           />
           <button className="room__quit-btn" onClick={handleQuit}>
             Quit room

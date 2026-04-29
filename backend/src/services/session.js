@@ -1,43 +1,6 @@
 import { query } from '../db/db.js';
 
-const convertIntervalToSeconds = (interval) => {
-  if (!interval) return 0;
-
-  // If it's already a number, return it
-  if (typeof interval === 'number') return Math.floor(interval);
-
-  // If it's a string, try to parse PostgreSQL interval format
-  if (typeof interval === 'string') {
-    // Handle format like "00:25:00" (HH:MM:SS)
-    const match = interval.match(/(\d+):(\d+):(\d+)/);
-    if (match) {
-      const [, hours, minutes, seconds] = match;
-      return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds);
-    }
-
-    // Handle format like "25 minutes" or "1 hour 30 minutes"
-    const totalSeconds = interval
-      .replace(/hours?/g, '*3600+')
-      .replace(/minutes?/g, '*60+')
-      .replace(/seconds?/g, '+')
-      .replace(/\s+/g, '')
-      .split('+')
-      .filter(Boolean)
-      .reduce((acc, part) => {
-        if (part.includes('*')) {
-          const [num, mult] = part.split('*');
-          return acc + (parseInt(num) * parseInt(mult));
-        }
-        return acc + parseInt(part);
-      }, 0);
-
-    return isNaN(totalSeconds) ? 0 : totalSeconds;
-  }
-
-  // For other types, try to convert to number
-  const num = parseInt(interval);
-  return isNaN(num) ? 0 : num;
-};
+const completed_session_status = 'completed';
 
 const formatSessionRow = (row) => ({
   ...row,
@@ -137,22 +100,24 @@ const calculateLongestStreak = (days) => {
 
 const getSessionStats = async (userId) => {
   const totals = await query(
-    `SELECT COUNT(*) FILTER (WHERE status = 'completed') AS sessions_completed,
-            COALESCE(SUM(target_time) FILTER (WHERE status = 'completed'), '0') AS total_focus_time
-     FROM focus_sessions WHERE user_id = $1`,
-    [userId]
+    `SELECT COUNT(*) AS sessions_completed,
+            COALESCE(SUM(target_time), INTERVAL '0 seconds') AS total_focus_time,
+            EXTRACT(EPOCH FROM COALESCE(SUM(target_time), INTERVAL '0 seconds')) AS total_focus_time_seconds
+     FROM focus_sessions
+     WHERE user_id = $1 AND status = $2`,
+    [userId, completed_session_status]
   );
   const daily = await query(
     `SELECT DATE(start_time) AS day, COUNT(*) AS sessions, SUM(target_time) AS focus_time
      FROM focus_sessions
-     WHERE user_id = $1 AND status = 'completed' AND start_time >= NOW() - INTERVAL '7 days'
+     WHERE user_id = $1 AND status = $2 AND start_time >= NOW() - INTERVAL '7 days'
      GROUP BY day ORDER BY day`,
-    [userId]
+    [userId, completed_session_status]
   );
   const streakRows = await query(
     `SELECT DISTINCT DATE(start_time) AS day FROM focus_sessions
-     WHERE user_id = $1 AND status = 'completed' ORDER BY day ASC`,
-    [userId]
+     WHERE user_id = $1 AND status = $2 ORDER BY day ASC`,
+    [userId, completed_session_status]
   );
   return {
     ...totals.rows[0],

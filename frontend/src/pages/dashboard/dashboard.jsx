@@ -33,7 +33,7 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
     try {
       const data = await getRooms();
       setRooms(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load rooms');
     } finally {
       setIsLoadingRooms(false);
@@ -79,7 +79,7 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
   };
 
   const totalFocusSeconds = stats
-    ? Math.floor(Number(stats.total_focus_time?.seconds || 0))
+    ? Math.floor(Number(stats.total_focus_time_seconds || 0))
     : 0;
 
   return (

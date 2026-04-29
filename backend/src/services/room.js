@@ -1,24 +1,6 @@
 import { query } from '../db/db.js';
 import { randomBytes } from 'crypto';
 
-const convertIntervalToSeconds = (interval) => {
-  if (!interval) return 0;
-
-  // If it's already a number, return it
-  if (typeof interval === 'number') return interval;
-
-  // If it's a string, try to parse it
-  if (typeof interval === 'string') {
-    const match = interval.match(/(\d+):(\d+):(\d+)/);
-    if (!match) return 0;
-    const [, hours, minutes, seconds] = match;
-    return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds);
-  }
-
-  // For other types, try to convert to number
-  return parseInt(interval) || 0;
-};
-
 const generateInviteCode = () => randomBytes(4).toString('hex').toUpperCase();
 
 const createRoom = async ({ name, hostId }) => {
