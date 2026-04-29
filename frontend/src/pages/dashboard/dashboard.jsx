@@ -160,7 +160,7 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
         <RoomModal
           mode="create"
           onClose={onClose}
-          onSubmit={handleJoin}
+          onSubmit={handleCreate}
         />
       )}
 
@@ -168,7 +168,7 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
         <RoomModal
           mode="join"
           onClose={onClose}
-          onSubmit={handleCreate}
+          onSubmit={handleJoin}
         />
       )}
     </div>
