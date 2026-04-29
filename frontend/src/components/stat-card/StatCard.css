@@ -1,0 +1,61 @@
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  background: var(--color-bg-card);
+  border: 3px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+
+  width: 100%; 
+}
+
+.stat-card__icon-left {
+  font-size: 32px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card__label {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.stat-card__value {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+@media (max-width: 1024px) {
+  .stat-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .stat-card__icon-left {
+    font-size: 24px;
+  }
+
+  .stat-card__label {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  .stat-card__value {
+    font-size: 20px;
+  }
+}
