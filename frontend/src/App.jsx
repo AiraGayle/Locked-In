@@ -1,5 +1,5 @@
-// import { useState, useEffect } from 'react';
-// import LoginPage from './pages/login/login.jsx';
+import { useState, useEffect } from 'react';
+import LoginPage from './pages/login/login.jsx';
 import DashboardPage from './pages/dashboard/dashboard.jsx';
 import RoomPage from './pages/room/room.jsx';
 import StatsPage from './pages/stats/stats.jsx';
@@ -45,13 +45,23 @@ const App = () => {
   return <LoginPage onLogin={handleLogin} />
   }
 
-
   if (path === '/dashboard') {
     return <DashboardPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
   }
-  if (path === '/rooms') {
-    return <RoomPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
+
+  if (path.startsWith('/room/')) {
+    const roomId = path.split('/')[2];
+
+    return (
+      <RoomPage
+        user={user}
+        roomId={roomId}
+        onLogout={handleLogout}
+        onNavigate={navigate}
+      />
+    );
   }
+
   if (path === '/stats') {
     return <StatsPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
   }

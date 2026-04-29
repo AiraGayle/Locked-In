@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import RoomCard from '../../components/room-card/RoomCard.jsx';
-import CreateRoomModal from '../../components/modal/CreateRoomModal.jsx';
-import JoinRoomModal from '../../components/modal/JoinRoomModal.jsx';
-import { getRooms, createRoom, joinRoom } from '../../services/room-service.js';
-import { getStats } from '../../services/session-service.js';
+import RoomModal from '../../modals/RoomModal.jsx';
+import { getRooms, createRoom, joinRoom } from '../../services/room.js';
+import { getStats } from '../../services/session.js';
 import { logout } from '../../services/auth-service.js';
-import { formatDuration } from '../../utils/date-utils.js';
-import { useActiveSessions } from '../../hooks/useActiveSessions.js';
+import { formatDuration } from '../../utils/time.js';
+import { useActiveSessions } from '../../hooks/active-session.js';
 import './dashboard.css';
 
 const StatCard = ({ label, value }) => (
@@ -25,6 +24,10 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
   const [isShowingCreateModal, setIsShowingCreateModal] = useState(false);
   const [isShowingJoinModal, setIsShowingJoinModal] = useState(false);
   const { activeSessions } = useActiveSessions();
+  const onClose = () => {
+    setIsShowingCreateModal(false);
+    setIsShowingJoinModal(false);
+  };
 
   const fetchRooms = async () => {
     try {
@@ -154,16 +157,18 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
       </main>
 
       {isShowingCreateModal && (
-        <CreateRoomModal
-          onClose={() => setIsShowingCreateModal(false)}
-          onCreate={handleCreate}
+        <RoomModal
+          mode="create"
+          onClose={onClose}
+          onSubmit={handleJoin}
         />
       )}
 
       {isShowingJoinModal && (
-        <JoinRoomModal
-          onClose={() => setIsShowingJoinModal(false)}
-          onJoin={handleJoin}
+        <RoomModal
+          mode="join"
+          onClose={onClose}
+          onSubmit={handleCreate}
         />
       )}
     </div>

@@ -31,12 +31,3 @@ const post = (path, body) => {
 };
 
 export { get, post };
-
-export const put = (endpoint, body) =>
-  request(endpoint, { method: 'PUT', body: JSON.stringify(body) });
-
-export const patch = (endpoint, body) =>
-  request(endpoint, { method: 'PATCH', body: JSON.stringify(body) });
-
-export const del = (endpoint) =>
-  request(endpoint, { method: 'DELETE' });

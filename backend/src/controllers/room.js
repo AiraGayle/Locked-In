@@ -1,8 +1,8 @@
 import {
   createRoom, getUserRooms, getRoomById,
   joinRoom, leaveRoom, closeRoom, removeMember,
-} from '../services/room-service.js';
-import { sendSuccess, sendError } from '../utils/response-utils.js';
+} from '../services/room.js';
+import { sendSuccess, sendError } from '../utils/response.js';
 
 const getAllRooms = async (req, res) => {
   try {

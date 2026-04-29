@@ -17,7 +17,7 @@ export default function LoginPage() {
   const handleTabSwitch = (t) => {
     setTab(t);
     setForm({ username: '', email: '', password: '' });
-    setError('');
+    setError('');F
   };
 
   const handleSubmit = async () => {
