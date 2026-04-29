@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { startCleanRoomsJob } from './jobs/clean-rooms';
+import { startCleanRoomsJob } from './jobs/clean-rooms.js';
 // TODO: import http from 'http' and create server for WebSocket support
 // TODO: import { initWebSocket } from './services/websocket.js'
 // TODO: import authRoutes from './routes/auth.js'
@@ -33,3 +33,4 @@ app.listen(PORT, () => {
   // TODO: call initWebSocket(server) here
   startCleanRoomsJob();
 });
+

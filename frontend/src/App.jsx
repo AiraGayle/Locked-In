@@ -1,6 +1,6 @@
-// import { useState, useEffect } from 'react';
-// import LoginPage from './pages/login/login.jsx';
+import { useState } from 'react';
 import DashboardPage from './pages/dashboard/dashboard.jsx';
+// import LoginPage from './pages/login/login.jsx';
 // import RoomPage from './pages/room/room.jsx';
 // import StatsPage from './pages/stats/stats.jsx';
 
@@ -13,6 +13,16 @@ const App = () => {
     return stored ? JSON.parse(stored) : null;
   });
 
+  const navigate = (newPath) => {
+    window.history.pushState({}, '', newPath);
+    setPath(newPath);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('user');
+    navigate('/');
+  };
+
   if (path === '/dashboard') {
     return <DashboardPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
   }
@@ -20,5 +30,4 @@ const App = () => {
   return <DashboardPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
 };
 
-export { navigate };
 export default App;

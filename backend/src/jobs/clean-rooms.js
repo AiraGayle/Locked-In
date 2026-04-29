@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { query } from '../config/db.js';
+import { query } from '../db/db.js';
 
 const closeEmptyRooms = async () => {
   const result = await query(

@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import RoomCard from '../../components/room-card/RoomCard.jsx';
-import CreateRoomModal from '../../components/modal/CreateRoomModal.jsx';
-import JoinRoomModal from '../../components/modal/JoinRoomModal.jsx';
 import { getRooms, createRoom, joinRoom } from '../../services/room-service.js';
 import { getStats } from '../../services/session-service.js';
 import { logout } from '../../services/auth-service.js';
 import { formatDuration } from '../../utils/date-utils.js';
-import { useActiveSessions } from '../../hooks/useActiveSessions.js';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus.js';
+import { saveRooms, getRooms as getCachedRooms, addToSyncQueue } from '../../lib/offlineDB.js';
+import { processSyncQueue } from '../../utils/sw-utils.js';
 import './dashboard.css';
 
 const StatCard = ({ label, value }) => (
@@ -24,14 +23,26 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
   const [error, setError] = useState('');
   const [isShowingCreateModal, setIsShowingCreateModal] = useState(false);
   const [isShowingJoinModal, setIsShowingJoinModal] = useState(false);
-  const { activeSessions } = useActiveSessions();
+  const isOnline = useOnlineStatus();
 
   const fetchRooms = async () => {
     try {
-      const data = await getRooms();
-      setRooms(data);
+      if (isOnline) {
+        const data = await getRooms();
+        setRooms(data);
+        await saveRooms(data); // cache for offline
+      } else {
+        const cached = await getCachedRooms();
+        setRooms(cached);
+      }
     } catch (err) {
-      setError('Failed to load rooms');
+      // fallback to cache if online fetch fails
+      const cached = await getCachedRooms();
+      if (cached.length > 0) {
+        setRooms(cached);
+      } else {
+        setError('Failed to load rooms');
+      }
     } finally {
       setIsLoadingRooms(false);
     }
@@ -51,19 +62,37 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
   useEffect(() => {
     fetchRooms();
     fetchStats();
-  }, []);
+  }, [isOnline]);
 
-  const handleCreate = async (name) => {
-    const room = await createRoom(name);
-    setRooms((prev) => [room, ...prev]);
-  };
+
+  useEffect(() => {
+    if (!isOnline) return;
+
+    const sync = async () => {
+      const results = await processSyncQueue();
+      if (results.some((r) => r.result)) {
+        await fetchRooms();
+      }
+      const failed = results.filter((r) => r.error);
+      if (failed.length > 0) {
+        setError(`${failed.length} offline action(s) failed to sync. Try again.`);
+      }
+    };
+
+  sync();
+}, [isOnline]); 
 
   const handleJoin = async (inviteCode) => {
-    const room = await joinRoom(inviteCode);
-    setRooms((prev) => {
-      const alreadyIn = prev.some((r) => r.id === room.id);
-      return alreadyIn ? prev : [room, ...prev];
-    });
+    if (isOnline) {
+      const room = await joinRoom(inviteCode);
+      setRooms((prev) => {
+        const alreadyIn = prev.some((r) => r.id === room.id);
+        return alreadyIn ? prev : [room, ...prev];
+      });
+    } else {
+      await addToSyncQueue({ type: 'JOIN_ROOM', payload: { inviteCode } });
+      setError('You are offline. Will join room when back online.');
+    }
   };
 
   const handleEnterRoom = (room) => {
@@ -94,6 +123,12 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
       </header>
 
       <main className="dashboard-page__main">
+        {!isOnline && (
+          <div className="dashboard-page__offline-banner">
+            ⚠️ You are offline. Showing cached data.
+          </div>
+        )}
+
         <p className="dashboard-page__welcome">Welcome back, {user.username}</p>
 
         <section className="dashboard-page__stats-section">
@@ -141,12 +176,10 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
           ) : (
             <div className="dashboard-page__rooms-grid">
               {rooms.map((room) => (
-                <RoomCard
-                  key={room.id}
-                  room={room}
-                  onJoin={handleEnterRoom}
-                  activeUserTimer={activeSessions[room.id]}
-                />
+                <div key={room.id} onClick={() => handleEnterRoom(room)}
+                  style={{padding:'1rem', border:'1px solid #ccc', borderRadius:'8px', cursor:'pointer'}}>
+                  <strong>{room.name}</strong>
+                </div>
               ))}
             </div>
           )}
