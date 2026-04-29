@@ -1,0 +1,28 @@
+.room-modal__error {
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.room-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.room-modal__cancel-btn {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: 9px 20px;
+}
+
+.room-modal__submit-btn {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  padding: 9px 20px;
+}
+
+.room-modal__submit-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}

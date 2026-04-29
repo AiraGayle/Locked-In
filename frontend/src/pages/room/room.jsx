@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Timer from '../../components/timer/Timer.jsx';
 import RoomMemberList from '../../components/room-member-list/RoomMemberList.jsx';
-import { getRoom, leaveRoom } from '../../services/room-service.js';
-import { cancelSession } from '../../services/session-service.js';
+import { getRoom, leaveRoom } from '../../services/room.js';
+import { cancelSession } from '../../services/session.js';
 import { connect, disconnect, send } from '../../services/ws-client.js';
-import { isOnline, onReconnect, onDisconnect } from '../../utils/sw-utils.js';
-import { useRoomMembers } from '../../hooks/useRoomMembers.js';
-import { useTimerHandlers } from '../../hooks/useTimerHandlers.js';
-import { useTimerState } from '../../hooks/useTimerState.js';
+import { isOnline, onReconnect, onDisconnect } from '../../utils/sw.js';
+import { useRoomMembers } from '../../hooks/room-members.js';
+import { useTimerHandlers } from '../../hooks/timer-handler.js';
+import { useTimerState } from '../../hooks/timer-state.js';
 import './room.css';
 
 const Room = ({ user, roomId, onNavigate }) => {

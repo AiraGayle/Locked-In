@@ -1,39 +1,36 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 import authRoutes from './routes/auth.js';
-import { startCleanRoomsJob } from './jobs/clean-rooms';
-// TODO: import http from 'http' and create server for WebSocket support
-// TODO: import { initWebSocket } from './services/websocket.js'
-// TODO: import authRoutes from './routes/auth.js'
-// TODO: import roomRoutes from './routes/rooms.js'
-// TODO: import sessionRoutes from './routes/sessions.js'
-// TODO: import statsRoutes from './routes/stats.js'
+import roomRoutes from './routes/room.js';
+import sessionRoutes from './routes/session.js';
+import { startCleanRoomsJob } from './jobs/clean-rooms.js';
+import { initWsServer } from './ws/ws-server.js';
 
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 
-// TODO: mount routes
-// app.use('/api/auth', authRoutes);
-// app.use('/api/rooms', roomRoutes);
-// app.use('/api/sessions', sessionRoutes);
-// app.use('/api/stats', statsRoutes);
-
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+app.use('/rooms', roomRoutes);
+app.use('/sessions', sessionRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-const PORT = process.env.PORT || 3000;
+const httpServer = createServer(app);
 
-// TODO: replace app.listen with server.listen so WebSocket can share the same port
-app.listen(PORT, () => {
+initWsServer(httpServer);
+startCleanRoomsJob();
+
+httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  // TODO: call initWebSocket(server) here
-  startCleanRoomsJob();
 });
+
+export { httpServer };
