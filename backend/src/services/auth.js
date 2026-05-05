@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { AppError } from '../errors/AppError.js';
 import { query } from '../config/db.js';
+import { createError } from '../utils/response.js';
 
 const SALT_ROUNDS = 10;
 const JWT_EXPIRES_IN = '7d';
@@ -9,15 +9,18 @@ const JWT_EXPIRES_IN = '7d';
 const signToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
-// --- Service functions ---
 export const registerUser = async ({ username, email, password }) => {
   const { rows: existing } = await query(
-    'SELECT id FROM users WHERE email = $1',
-    [email]
+    'SELECT id, email, username FROM users WHERE email = $1 OR username = $2',
+    [email, username]
   );
-  if (existing.length > 0)
-    throw new AppError('Email already in use', 409);
-
+  if (existing.length > 0) 
+     {
+    const taken = existing[0];
+    if (taken.email === email) throw createError('Email already in use', 409);
+    throw createError('Username already in use', 409);
+  }
+   
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
   const { rows } = await query(
@@ -41,10 +44,10 @@ export const loginUser = async ({ email, password }) => {
 
   // for email enumeration
   const user = rows[0];
-  if (!user) throw new AppError('Invalid email or password', 401);
+  if (!user) throw createError('Invalid email or password', 401);
 
   const match = await bcrypt.compare(password, user.password);
-  if (!match) throw new AppError('Invalid email or password', 401);
+  if (!match) throw createError('Invalid email or password', 401);
 
   const token = signToken({ userId: user.id, email: user.email });
   const { password: _, ...safeUser } = user; // strip hash before returning
@@ -58,6 +61,6 @@ export const getAuthenticatedUser = async (userId) => {
     [userId]
   );
 
-  if (!rows[0]) throw new AppError('User not found', 404);
+  if (!rows[0]) throw createError('User not found', 404);
   return rows[0];
 };

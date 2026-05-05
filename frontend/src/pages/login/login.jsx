@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import './Login.css';
+import './login.css';
 
-import { register, login } from '../../services/auth-service.js';
+import { register, login } from '../../services/auth.js';
 
 export default function LoginPage() {
   const [tab, setTab] = useState('login');

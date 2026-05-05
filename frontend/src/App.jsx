@@ -3,7 +3,7 @@ import LoginPage from './pages/login/login.jsx';
 import DashboardPage from './pages/dashboard/dashboard.jsx';
 import RoomPage from './pages/room/room.jsx';
 import StatsPage from './pages/stats/stats.jsx';
-import RegisterPage from './pages/login/Register.jsx';
+
 
 const getPath = () => window.location.pathname;
 

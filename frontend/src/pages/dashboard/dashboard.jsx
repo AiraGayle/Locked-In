@@ -3,7 +3,7 @@ import RoomCard from '../../components/room-card/RoomCard.jsx';
 import RoomModal from '../../modals/RoomModal.jsx';
 import { getRooms, createRoom, joinRoom } from '../../services/room.js';
 import { getStats } from '../../services/session.js';
-import { logout } from '../../services/auth-service.js';
+import { logout } from '../../services/auth.js';
 import { formatDuration } from '../../utils/time.js';
 import { useActiveSessions } from '../../hooks/active-session.js';
 import './dashboard.css';
