@@ -18,7 +18,7 @@ export const registerUser = async ({ username, email, password }) => {
      {
     const taken = existing[0];
     if (taken.email === email) throw createError('Email already in use', 409);
-    throw createError('Username already in use', 409);
+    throw createError('Username already exists', 409);
   }
    
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
@@ -42,7 +42,6 @@ export const loginUser = async ({ email, password }) => {
     [email]
   );
 
-  // for email enumeration
   const user = rows[0];
   if (!user) throw createError('Invalid email or password', 401);
 
@@ -50,7 +49,7 @@ export const loginUser = async ({ email, password }) => {
   if (!match) throw createError('Invalid email or password', 401);
 
   const token = signToken({ userId: user.id, email: user.email });
-  const { password: _, ...safeUser } = user; // strip hash before returning
+  const { password: _, ...safeUser } = user; 
 
   return { token, user: safeUser };
 };
