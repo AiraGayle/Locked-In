@@ -6,4 +6,7 @@ const sendError = (res, statusCode, message) => {
   return res.status(statusCode).json({ success: false, error: message });
 };
 
-export { sendSuccess, sendError };
+const createError = (message, statusCode) =>
+  Object.assign(new Error(message), { statusCode });
+
+export { sendSuccess, sendError, createError };
