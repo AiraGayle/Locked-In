@@ -34,3 +34,8 @@ export const getCurrentUser = () => {
   const user = sessionStorage.getItem('user');
   return user ? JSON.parse(user) : null;
 };
+
+export const forgotPassword = async ({ email }) => {
+  const data = await post('/auth/forgot-password', { email });
+  return data;
+};
