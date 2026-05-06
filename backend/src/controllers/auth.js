@@ -3,6 +3,8 @@ import {
   registerUser,
   loginUser,
   getAuthenticatedUser,
+  forgotPassword,
+  resetPassword
 } from '../services/auth.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
@@ -61,4 +63,32 @@ export const getMe = async (req, res) => {
 
 export const logout = (_req, res) => {
   return sendSuccess(res, { message: 'Logged out successfully' });
+};
+
+export const forgotPass = async (req, res) => {
+  const { email } = req.body;
+  if (!email || !isValidEmail(email))
+    return sendError(res, 400, 'Valid email is required');
+
+  try {
+    const result = await forgotPassword(email);
+    return sendSuccess(res, result);
+  } catch (err) {
+    return sendError(res, err.statusCode ?? 500, err.message ?? 'Internal server error');
+  }
+};
+
+export const resetPass = async (req, res) => {
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword)
+    return sendError(res, 400, 'Token and new password are required');
+  if (newPassword.length < 6)
+    return sendError(res, 400, 'Password must be at least 6 characters');
+
+  try {
+    const result = await resetPassword({ token, newPassword });
+    return sendSuccess(res, result);
+  } catch (err) {
+    return sendError(res, err.statusCode ?? 500, err.message ?? 'Internal server error');
+  }
 };

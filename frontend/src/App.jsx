@@ -3,7 +3,7 @@ import LoginPage from './pages/login/login.jsx';
 import DashboardPage from './pages/dashboard/dashboard.jsx';
 import RoomPage from './pages/room/room.jsx';
 import StatsPage from './pages/stats/stats.jsx';
-
+import ResetPassword from './pages/login/resetPass.jsx';
 
 const getPath = () => window.location.pathname;
 
@@ -36,6 +36,15 @@ const App = () => {
     setUser(null);
     navigate('/');
   };
+
+  if (path === '/forgot-password'){
+    return <ResetPassword/>
+  }
+
+  if (!user){
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
 
 
   if (!user) {

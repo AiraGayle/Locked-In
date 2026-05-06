@@ -1,35 +1,44 @@
 import { useState } from 'react';
 import './login.css';
 
-import { register, login } from '../../services/auth.js';
+import { register, login, forgotPassword } from '../../services/auth.js';
 
 export default function LoginPage() {
   const [tab, setTab] = useState('login');
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError('');
+    setSuccess('');
   };
 
   const handleTabSwitch = (t) => {
     setTab(t);
     setForm({ username: '', email: '', password: '' });
     setError('');
+    setSuccess('');
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
+    setSuccess('');
     try {
-      if (tab === 'login') {
+      if (showForgot){
+        await forgotPassword({ email: form.email }); 
+        setSuccess('If that email exists, a reset link has been sent.');
+      } else if (tab === 'login') {
         await login({ email: form.email, password: form.password });
+        window.location.href = '/dashboard';
       } else {
         await register({ username: form.username, email: form.email, password: form.password });
+        window.location.href = '/dashboard';
       }
-      window.location.href = '/dashboard';
     } catch (err) {
       setError(err.message);
     } finally {
@@ -68,7 +77,7 @@ export default function LoginPage() {
 
         {/* Form */}
         <div className="login-page__form" onKeyDown={handleKeyDown}>
-          {tab === 'register' && (
+          {!showForgot && tab === 'register' && (
             <div className="form-field">
               <label htmlFor="username">Username:</label>
               <input
@@ -94,6 +103,8 @@ export default function LoginPage() {
             />
           </div>
 
+
+          {!showForgot && (
           <div className="form-field">
             <label htmlFor="password">Password:</label>
             <input
@@ -104,17 +115,45 @@ export default function LoginPage() {
               onChange={handleChange}
               autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
             />
+            { tab === 'login' && (
+              <button
+              className="login-page__forgot-link"
+              onClick={()=> {
+                setShowForgot(true);
+                setError('');
+                setSuccess('');
+              }}
+            > Fogot password?
+            </button>
+            )}
           </div>
+          )}
 
           {error && <p className="login-page__error">{error}</p>}
+          {success && <p className="login-page__success">{success}</p>}
 
           <button
             className="login-page__submit"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || (showForgot && !!success)}
           >
-            {loading ? 'Please wait...' : tab === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}
+            {loading ? 'Please wait...' : showForgot ? 'SEND RESET LINK'
+            : tab === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'}
           </button>
+
+          {showForgot && (
+            <button
+            className="login-page__forgot-link"
+            onClick={() => {
+              setShowForgot(false);
+              setForm({username: '', email: '', password: ''});
+              setError('');
+              setSuccess('');
+            }}
+            >
+            Back to login
+            </button>
+          )}
         </div>
 
       </div>
