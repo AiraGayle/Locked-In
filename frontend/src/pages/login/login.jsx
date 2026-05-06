@@ -30,7 +30,7 @@ export default function LoginPage() {
     setSuccess('');
     try {
       if (showForgot){
-        await forgotPassword({ email: form.email }); // was forgotPassword, also missing from handleSubmit
+        await forgotPassword({ email: form.email }); 
         setSuccess('If that email exists, a reset link has been sent.');
       } else if (tab === 'login') {
         await login({ email: form.email, password: form.password });
