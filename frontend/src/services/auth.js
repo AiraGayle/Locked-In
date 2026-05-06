@@ -20,7 +20,6 @@ export const logout = async () => {
     await post('/auth/logout');
   } finally {
     sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
   }
 };
 
