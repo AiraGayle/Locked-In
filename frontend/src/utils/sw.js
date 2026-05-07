@@ -1,7 +1,8 @@
+import { getSyncQueue, removeSyncItem } from '../lib/offlineDB.js';
+
 const registerServiceWorker = async () => {
   if (!('serviceWorker' in navigator)) return;
 
-  // Defer SW registration to idle time for better performance
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
       navigator.serviceWorker.register('/service-worker.js')
@@ -9,7 +10,6 @@ const registerServiceWorker = async () => {
         .catch((err) => console.error('[sw] Registration failed:', err));
     }, { timeout: 2000 });
   } else {
-    // Fallback: defer with setTimeout
     setTimeout(() => {
       navigator.serviceWorker.register('/service-worker.js')
         .then((reg) => console.log('[sw] Registered:', reg.scope))
@@ -18,16 +18,40 @@ const registerServiceWorker = async () => {
   }
 };
 
-const isOnline = () => navigator.onLine;
+export const isOnline = () => navigator.onLine;
 
-const onReconnect = (callback) => {
+export const onReconnect = (callback) => {
   window.addEventListener('online', callback);
   return () => window.removeEventListener('online', callback);
 };
 
-const onDisconnect = (callback) => {
+export const onDisconnect = (callback) => {
   window.addEventListener('offline', callback);
   return () => window.removeEventListener('offline', callback);
 };
 
-export { registerServiceWorker, isOnline, onReconnect, onDisconnect };
+export const processSyncQueue = async (handlers) => {
+  const queue = await getSyncQueue();
+  if (queue.length === 0) return [];
+
+  const results = [];
+
+  for (const item of queue) {
+    try {
+      let result = null;
+
+      if (handlers[item.type]) {
+        result = await handlers[item.type](item.payload);
+      }
+
+      await removeSyncItem(item.id);
+      results.push({ action: item, result });
+    } catch (err) {
+      results.push({ action: item, error: err.message });
+    }
+  }
+
+  return results;
+};
+
+export { registerServiceWorker };
