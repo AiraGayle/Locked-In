@@ -3,6 +3,7 @@ import { getSessions } from '../services/session.js';
 import { isOnline } from '../utils/sw.js';
 
 export const useActiveSessions = () => {
+  
   const [activeSessions, setActiveSessions] = useState(() => {
     const stored = localStorage.getItem('activeSessions');
     return stored ? JSON.parse(stored) : {};
@@ -43,15 +44,22 @@ export const useActiveSessions = () => {
     }
   }, [updateLocalStorage]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (isOnline()) {
       fetchActiveSessions();
-      // Increase polling interval from 30s to 60s for better mobile performance
       const interval = setInterval(fetchActiveSessions, 60000);
+
+      const handleOnline = () => fetchActiveSessions();
+      window.addEventListener('online', handleOnline);
       return () => {
         clearInterval(interval);
+        window.removeEventListener('online', handleOnline);
         if (storageTimerRef.current) clearTimeout(storageTimerRef.current);
       };
+    } else {
+      const handleOnline = () => fetchActiveSessions();
+      window.addEventListener('online', handleOnline);
+      return () => window.removeEventListener('online', handleOnline);
     }
   }, [fetchActiveSessions]);
 

@@ -4,8 +4,9 @@ import RoomModal from '../../modals/RoomModal.jsx';
 import { getRooms, createRoom, joinRoom } from '../../services/room.js';
 import { getStats } from '../../services/session.js';
 import { logout } from '../../services/auth.js';
-import { formatDuration } from '../../utils/time.js';
+import { formatFocusTime } from '../../utils/time.js';
 import { useActiveSessions } from '../../hooks/active-session.js';
+import Navbar from '../../components/navbar/Navbar.jsx';
 import './dashboard.css';
 
 const StatCard = ({ label, value }) => (
@@ -84,17 +85,15 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
 
   return (
     <div className="dashboard-page">
-      <header className="dashboard-page__header">
-        <h1 className="dashboard-page__logo">Focus Room</h1>
-        <div className="dashboard-page__header-actions">
-          <button className="dashboard-page__nav-btn" onClick={() => onNavigate('/stats')}>
-            Stats
-          </button>
-          <button className="dashboard-page__logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </header>
+      <Navbar
+        title="Focus Room"
+        leftButtons={[
+          { label: 'Stats', onClick: () => onNavigate('/stats') },
+        ]}
+        rightButtons={[
+          { label: 'Logout', variant: 'danger', onClick: handleLogout },
+        ]}
+      />
 
       <main className="dashboard-page__main">
         <p className="dashboard-page__welcome">Welcome back, {user.username}</p>
@@ -102,7 +101,7 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
         <section className="dashboard-page__stats-section">
           <StatCard
             label="Total focus time"
-            value={isLoadingStats ? '—' : formatDuration(totalFocusSeconds)}
+            value={isLoadingStats ? '—' : formatFocusTime(totalFocusSeconds)}
           />
           <StatCard
             label="Sessions completed"

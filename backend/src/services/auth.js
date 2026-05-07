@@ -40,7 +40,7 @@ export const registerUser = async ({ username, email, password }) => {
 
 export const loginUser = async ({ email, password }) => {
   const { rows } = await query(
-    'SELECT id, username, email, password FROM users WHERE email = $1',
+    'SELECT id, username, email, password, created_at FROM users WHERE email = $1',
     [email]
   );
 

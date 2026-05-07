@@ -8,10 +8,11 @@
 
 .stats-main {
   margin: 0 auto;
-  padding: 50px;
+  padding: 2rem 1.5rem;   
+  max-width: 1100px;     
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  gap: 2rem;              
 }
 
 .stats-card-grid {
