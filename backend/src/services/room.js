@@ -21,16 +21,31 @@ const getUserRooms = async (userId) => {
   const result = await query(
     `SELECT r.* FROM rooms r
      JOIN room_members rm ON rm.room_id = r.id
-     WHERE rm.user_id = $1 AND rm.status IN ('active', 'idle')
+     WHERE rm.user_id = $1
+       AND rm.status <> 'removed'
+       AND r.status = 'active'
      ORDER BY r.created_at DESC`,
     [userId]
   );
   return result.rows;
 };
 
-const getRoomById = async (roomId) => {
+const getRoomById = async (roomId, userId) => {
   const roomResult = await query('SELECT * FROM rooms WHERE id = $1', [roomId]);
   if (roomResult.rows.length === 0) throw new Error('Room not found');
+  const room = roomResult.rows[0];
+
+  if (userId && room.status === 'active') {
+    await query(
+      `UPDATE room_members
+       SET status = 'idle', left_at = NULL
+       WHERE room_id = $1
+         AND user_id = $2
+         AND status = 'left'`,
+      [roomId, userId]
+    );
+    await query("UPDATE rooms SET empty_since = NULL WHERE id = $1", [roomId]);
+  }
 
   const membersResult = await query(
     `SELECT rm.role, rm.status, u.id AS user_id, u.username,
@@ -56,7 +71,7 @@ const getRoomById = async (roomId) => {
     sessionStatus: member.session_status
   }));
 
-  return { ...roomResult.rows[0], members };
+  return { ...room, members };
 };
 
 const joinRoom = async ({ inviteCode, userId }) => {

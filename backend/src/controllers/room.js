@@ -26,7 +26,7 @@ const createNewRoom = async (req, res) => {
 
 const getRoom = async (req, res) => {
   try {
-    const room = await getRoomById(req.params.id);
+    const room = await getRoomById(req.params.id, req.user.userId);
     return sendSuccess(res, room, 200);
   } catch (err) {
     return sendError(res, 404, err.message);
