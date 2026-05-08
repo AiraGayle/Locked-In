@@ -3,7 +3,7 @@
   width: 100%;
   background: var(--color-bg);
   color: var(--color-text-primary);
-  font-family: var(--font-sans);
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .stats-main {
@@ -19,6 +19,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
+  color: #FFFFFF;
 }
 
 @media (max-width: 1024px) {
@@ -30,6 +31,7 @@
   .stats-card-grid {
     grid-template-columns: 1fr;
     gap: 10px;
+    
   }
 
    .stats-top {

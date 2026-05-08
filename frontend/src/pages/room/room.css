@@ -19,6 +19,7 @@
   font-weight: 500;
   padding: 8px 1rem;
   font-size: 13px;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .room__header {
@@ -37,6 +38,7 @@
   padding: 6px 14px;
   font-size: 13px;
   flex-shrink: 0;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .room__back-btn {
@@ -72,6 +74,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .room__invite-code {
@@ -80,7 +83,7 @@
   gap: 6px;
   background: transparent;
   border: none;
-  font-family: var(--font-mono);
+  font-family: 'Rajdhani', sans-serif;
   font-size: 12px;
   color: var(--color-text-muted);
   padding: 0;

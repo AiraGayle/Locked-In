@@ -45,8 +45,6 @@ const App = () => {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-
-
   if (!user) {
     if (path === '/register') {
     return <RegisterPage />;
