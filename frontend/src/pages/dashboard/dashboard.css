@@ -16,6 +16,7 @@
 .dashboard-page__logo {
   font-size: 18px;
   font-weight: 600;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__header-actions {
@@ -28,11 +29,13 @@
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
   padding: 8px 16px;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__nav-btn:hover {
   color: var(--color-text-primary);
   border-color: var(--color-border-light);
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__logout-btn {
@@ -40,6 +43,8 @@
   color: var(--color-danger);
   border: 1px solid var(--color-danger);
   padding: 8px 16px;
+  font-family: 'Rajdhani', sans-serif;
+
 }
 
 .dashboard-page__main {
@@ -52,8 +57,9 @@
 
 .dashboard-page__welcome {
   font-size: 15px;
-  color: var(--color-text-secondary);
+  color: #FFFFFF;
   margin-bottom: 1.5rem;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__stats-section {
@@ -82,6 +88,7 @@
 .dashboard-page__stat-label {
   font-size: 12px;
   color: var(--color-text-secondary);
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__rooms-header {
@@ -96,6 +103,7 @@
 .dashboard-page__rooms-title {
   font-size: 16px;
   font-weight: 600;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__rooms-actions {
@@ -109,6 +117,7 @@
   border: 1px solid var(--color-border);
   padding: 8px 16px;
   font-size: 13px;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__join-btn:hover {
@@ -121,6 +130,7 @@
   color: var(--color-primary-text);
   padding: 8px 16px;
   font-size: 13px;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__create-btn:hover {
@@ -141,12 +151,14 @@
   font-size: 14px;
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);
+  font-family: 'Rajdhani', sans-serif;
 }
 
 .dashboard-page__error {
   font-size: 13px;
   color: var(--color-danger);
   margin-bottom: 1rem;
+  font-family: 'Rajdhani', sans-serif;
 }
 
 @media (max-width: 600px) {
@@ -166,4 +178,6 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  
 }

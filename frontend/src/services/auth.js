@@ -1,6 +1,5 @@
 import { post, get } from './api-client.js';
 
-
 export const register = async ({ username, email, password }) => {
   const data = await post('/auth/register', { username, email, password });
   sessionStorage.setItem('token', data.token);

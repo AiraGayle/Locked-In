@@ -12,32 +12,40 @@
  
   flex-direction: column; 
 
-  background-color: #262624;
+  background-color: #01111D;
+  opacity: 1;
+
+}
+
+
+.login-page__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-page__logo {
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
+  margin-top: 60px;
 }
 
 
 
-.login-page__banner {
-  width: 90%;
-  height: 72px;
-  background: #45453C;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  margin-bottom: 1rem;
-  position: relative;
-  overflow: hidden;
-  margin-top: 20px;
-}
+
 
 .login-page__card {
-  background: #262624;
+  background: #01111D;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 2.5rem 2rem;
   width: 100%;
   max-width: 480px;
   animation: cardIn 0.35s ease both;
-  margin-top: 50px;
+  margin-top: 5px;
+  z-index: 1;
 }
 
 @keyframes cardIn {
@@ -130,7 +138,8 @@
 }
 
 .login-page__submit:hover:not(:disabled) {
-  background:  #326CA6;
+  background:  #3d7fc0;
+  border-color: #5a9fd4;
 }
 
 .login-page__submit:disabled {
@@ -163,6 +172,11 @@
   width: 100%;
   box-sizing: border-box;
 }
+
+.form-field input:focus {
+    border-color: #326CA6;
+    box-shadow: 0 0 0 2px rgba(50, 108, 166, 0.3);
+  }
 
 .login-page__forgot-link {
   background: none;

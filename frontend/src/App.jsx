@@ -45,6 +45,13 @@ const App = () => {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  if (!user) {
+    if (path === '/register') {
+    return <RegisterPage />;
+  }
+  return <LoginPage onLogin={handleLogin} />
+  }
+
   if (path === '/dashboard') {
     return <DashboardPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
   }
