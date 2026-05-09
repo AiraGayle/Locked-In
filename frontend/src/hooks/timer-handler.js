@@ -1,7 +1,10 @@
 import { startSession, pauseSession, resumeSession, completeSession, cancelSession } from '../services/session.js';
 import { send } from '../services/ws-client.js';
+import { useRef } from 'react';
 
 export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessionData, setMembers) => {
+  const isCompletingRef = useRef(false);
+  
   const handleTimerStart = async (targetSeconds) => {
     const session = await startSession(roomId, targetSeconds);
     setSessionId(session.id);
@@ -48,7 +51,17 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
   };
 
   const handleTimerComplete = async () => {
-    if (sessionId) await completeSession(sessionId);
+    if (!sessionId || isCompletingRef.current) return; // guard
+    isCompletingRef.current = true;
+
+    try {
+      await completeSession(sessionId);
+    } catch (err) {
+      console.error('Complete failed:', err);
+    } finally {
+      isCompletingRef.current = false;
+    }
+    
     setSessionId(null);
     setSessionData(null);
     send('timer:complete', { userId: user.id });

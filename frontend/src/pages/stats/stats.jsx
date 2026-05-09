@@ -9,7 +9,7 @@ import { formatFocusTime } from '../../utils/time';
 import { useState, useEffect } from 'react';
 import { getStats } from '../../services/session';
 
-const StatsPage = ( { onNavigate, user }) => {
+const StatsPage = ( { onNavigate, user, onUserUpdate }) => {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,6 +46,8 @@ const StatsPage = ( { onNavigate, user }) => {
             name={user?.username}
             email={user?.email}
             joinedDate={user?.created_at}
+            avatarUrl={user?.avatar_url}
+            onUserUpdate={onUserUpdate}
           />
           <div className="stats-card-grid">
             {STATS.map((s) => (
