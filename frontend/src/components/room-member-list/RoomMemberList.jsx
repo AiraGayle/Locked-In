@@ -44,41 +44,53 @@ const MemberTimer = ({ startedAt, targetSeconds, remainingSeconds, isPaused }) =
   return <span className="member-timer">{formatDuration(secondsLeft)}</span>;
 };
 
-const MemberItem = ({ member, isCurrentUser }) => (
-  <div className="member-item">
-    <div className="member-avatar">
-      {(member.username || 'U').charAt(0).toUpperCase()}
+const MemberItem = ({ member, isCurrentUser }) => {
+  const initials = (member.username || 'U')
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  return (
+    <div className="member-item">
+      <div className="member-avatar">
+        {member.avatar_url
+          ? <img src={member.avatar_url} alt={member.username} className="member-avatar__img" />
+          : initials
+        }
+      </div>
+      <div className="member-info">
+        <span className="member-name">
+          {member.username || 'Unknown'}{isCurrentUser ? ' (you)' : ''}
+        </span>
+        <span className={`member-status member-status--${member.status}`}>
+          {STATUS_LABELS[member.status] || member.status}
+        </span>
+      </div>
+      {!isCurrentUser && member.targetSeconds && (
+        member.status === 'active' && member.startedAt ? (
+          <MemberTimer
+            startedAt={member.startedAt}
+            targetSeconds={member.targetSeconds}
+            remainingSeconds={member.remainingSeconds}
+            isPaused={false}
+          />
+        ) : member.status === 'idle' && member.remainingSeconds ? (
+          <MemberTimer
+            startedAt={null}
+            targetSeconds={member.remainingSeconds}
+            remainingSeconds={member.remainingSeconds}
+            isPaused={true}
+          />
+        ) : null
+      )}
+      {member.role === 'host' && (
+        <span className="member-host-badge">host</span>
+      )}
     </div>
-    <div className="member-info">
-      <span className="member-name">
-        {member.username || 'Unknown'}{isCurrentUser ? ' (you)' : ''}
-      </span>
-      <span className={`member-status member-status--${member.status}`}>
-        {STATUS_LABELS[member.status] || member.status}
-      </span>
-    </div>
-    {!isCurrentUser && member.targetSeconds && (
-      member.status === 'active' && member.startedAt ? (
-        <MemberTimer
-          startedAt={member.startedAt}
-          targetSeconds={member.targetSeconds}
-          remainingSeconds={member.remainingSeconds}
-          isPaused={false}
-        />
-      ) : member.status === 'idle' && member.remainingSeconds ? (
-        <MemberTimer
-          startedAt={null}
-          targetSeconds={member.remainingSeconds}
-          remainingSeconds={member.remainingSeconds}
-          isPaused={true}
-        />
-      ) : null
-    )}
-    {member.role === 'host' && (
-      <span className="member-host-badge">host</span>
-    )}
-  </div>
-);
+  )
+};
 
 const RoomMemberList = ({ members, userId }) => (
   <div className="member-list">

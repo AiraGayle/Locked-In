@@ -41,6 +41,13 @@
   flex-shrink: 0;
 }
 
+.member-avatar__img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .member-info {
   display: flex;
   flex-direction: column;

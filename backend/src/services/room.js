@@ -48,7 +48,7 @@ const getRoomById = async (roomId, userId) => {
   }
 
   const membersResult = await query(
-    `SELECT rm.role, rm.status, u.id AS user_id, u.username,
+    `SELECT rm.role, rm.status, u.id AS user_id, u.username, u.avatar_url,
             fs.id AS session_id, fs.start_time, 
             EXTRACT(EPOCH FROM fs.target_time) AS target_seconds,
             EXTRACT(EPOCH FROM fs.remaining_time) AS remaining_seconds,
