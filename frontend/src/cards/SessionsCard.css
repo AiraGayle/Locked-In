@@ -6,7 +6,7 @@
 }
 
 .sessions-card__title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.02em;
   margin-bottom: 16px;
@@ -22,7 +22,7 @@
 }
 
 .sessions-card__th {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -50,7 +50,7 @@
 }
 
 .sessions-card__name {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
 }
@@ -63,7 +63,7 @@
 }
 
 .sessions-card__cell {
-  font-size: 18px;
+  font-size: 14px;
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;

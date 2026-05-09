@@ -12,18 +12,18 @@ const closeEmptyRooms = async () => {
 
   if (result.rows.length > 0) {
     console.log(`[cron] Closed ${result.rows.length} empty room(s):`, result.rows.map(r => r.name));
-  }
+  } 
 };
 
 const startCleanRoomsJob = () => {
-  cron.schedule('0 * * * *', async () => {
+  cron.schedule('*/5 * * * *', async () => {
     console.log('[cron] Running CleanRooms job...');
     await closeEmptyRooms();
   }, {
     timezone: 'Asia/Manila'
   });
 
-  console.log('[cron] CleanRooms job scheduled (every hour)');
+  console.log('[cron] CleanRooms job scheduled (every 5 minutes)');
 };
 
 export { startCleanRoomsJob };

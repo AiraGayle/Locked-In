@@ -30,4 +30,26 @@ const post = (path, body) => {
   }).then(handleResponse);
 };
 
-export { get, post };
+const postFormData = (path, formData) => {
+  const headers = {};
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  // don't set Content-Type — browser sets it automatically with the boundary
+
+  return fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  }).then(handleResponse);
+};
+
+const patch = (path, body) => {
+  return fetch(`${BASE_URL}${path}`, {
+    method: 'PATCH',
+    headers: buildHeaders(),
+    body: JSON.stringify(body),
+  }).then(handleResponse);
+};
+
+export { get, post, postFormData, patch };
+

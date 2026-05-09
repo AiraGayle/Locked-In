@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './login.css';
 
 import { register, login, forgotPassword } from '../../services/auth.js';
+import logo from '../../assets/logo_fc.png';
 
 export default function LoginPage() {
   const [tab, setTab] = useState('login');
@@ -53,9 +54,17 @@ export default function LoginPage() {
   return (
     <div className="login-page" style={{ width: "100vw", height: "100vh" }}>
 
+      <img
+            src={logo} alt="Focus Room Logo" className="login-page__logo"
+          />
+
        {/* Banner */}
-      <div className="login-page__banner" />
+    
       <div className="login-page__card">
+        <div className="login-page__brand">
+          
+        </div>
+
 
        
 

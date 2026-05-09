@@ -77,7 +77,10 @@ const cancelSession = async ({ sessionId, userId }) => {
 
 const getSessionHistory = async (userId) => {
   const result = await query(
-    `SELECT fs.*, r.name AS room_name FROM focus_sessions fs
+    `SELECT fs.*, r.name AS room_name,
+            EXTRACT(EPOCH FROM fs.target_time) AS target_time_secs,
+            EXTRACT(EPOCH FROM fs.remaining_time) AS remaining_time_secs
+     FROM focus_sessions fs
      JOIN rooms r ON r.id = fs.room_id
      WHERE fs.user_id = $1 ORDER BY fs.start_time DESC`,
     [userId]
@@ -98,20 +101,65 @@ const calculateLongestStreak = (days) => {
   return longest;
 };
 
+const calculateCurrentStreak = (days) => {
+  if (!days.length) return 0;
+
+  const dates = days.map((d) => new Date(d).toDateString()).reverse(); // most recent first
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const mostRecent = new Date(dates[0]);
+  if (mostRecent < yesterday) return 0; // streak is broken
+
+  let streak = 1;
+  for (let i = 1; i < dates.length; i++) {
+    const diff = (new Date(dates[i - 1]) - new Date(dates[i])) / (1000 * 60 * 60 * 24);
+    if (diff === 1) streak++;
+    else break;
+  }
+  return streak;
+};
+
 const getSessionStats = async (userId) => {
   const totals = await query(
     `SELECT COUNT(*) AS sessions_completed,
-            COALESCE(SUM(target_time), INTERVAL '0 seconds') AS total_focus_time,
             EXTRACT(EPOCH FROM COALESCE(SUM(target_time), INTERVAL '0 seconds')) AS total_focus_time_seconds
      FROM focus_sessions
      WHERE user_id = $1 AND status = $2`,
     [userId, completed_session_status]
   );
   const daily = await query(
-    `SELECT DATE(start_time) AS day, COUNT(*) AS sessions, SUM(target_time) AS focus_time
-     FROM focus_sessions
-     WHERE user_id = $1 AND status = $2 AND start_time >= NOW() - INTERVAL '7 days'
-     GROUP BY day ORDER BY day`,
+     `WITH week AS (
+       SELECT generate_series(
+         CURRENT_DATE - EXTRACT(DOW FROM CURRENT_DATE)::int * INTERVAL '1 day',
+         CURRENT_DATE - EXTRACT(DOW FROM CURRENT_DATE)::int * INTERVAL '1 day' + INTERVAL '6 days',
+         INTERVAL '1 day'
+       )::date AS day
+     ),
+     session_totals AS (
+       SELECT DATE(start_time) AS day,
+              COUNT(*) AS sessions,
+              SUM(target_time) AS focus_time,
+              EXTRACT(EPOCH FROM SUM(target_time)) AS total_seconds
+       FROM focus_sessions
+       WHERE user_id = $1
+         AND status = $2
+         AND start_time >= CURRENT_DATE - EXTRACT(DOW FROM CURRENT_DATE)::int * INTERVAL '1 day'
+         AND start_time < CURRENT_DATE - EXTRACT(DOW FROM CURRENT_DATE)::int * INTERVAL '1 day' + INTERVAL '7 days'
+       GROUP BY DATE(start_time)
+     )
+     SELECT week.day,
+            week.day AS date,
+            COALESCE(session_totals.sessions, 0) AS sessions,
+            COALESCE(session_totals.sessions, 0) AS sessions_count,
+            COALESCE(session_totals.focus_time, INTERVAL '0 seconds') AS focus_time,
+            COALESCE(session_totals.total_seconds, 0) AS total_seconds
+     FROM week
+     LEFT JOIN session_totals ON session_totals.day = week.day
+     ORDER BY week.day`,
     [userId, completed_session_status]
   );
   const streakRows = await query(
@@ -119,9 +167,12 @@ const getSessionStats = async (userId) => {
      WHERE user_id = $1 AND status = $2 ORDER BY day ASC`,
     [userId, completed_session_status]
   );
+  const allDays = streakRows.rows.map((r) => r.day);
+
   return {
     ...totals.rows[0],
-    longest_streak: calculateLongestStreak(streakRows.rows.map((r) => r.day)),
+    longest_streak: calculateLongestStreak(allDays),
+    current_streak: calculateCurrentStreak(allDays),
     daily: daily.rows,
   };
 };

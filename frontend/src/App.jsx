@@ -45,8 +45,6 @@ const App = () => {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-
-
   if (!user) {
     if (path === '/register') {
     return <RegisterPage />;
@@ -71,8 +69,14 @@ const App = () => {
     );
   }
 
+  const handleUserUpdate = (updatedFields) => {
+    const updated = { ...user, ...updatedFields };
+    sessionStorage.setItem('user', JSON.stringify(updated));
+    setUser(updated);
+  };
+
   if (path === '/stats') {
-    return <StatsPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
+    return <StatsPage user={user} onLogout={handleLogout} onNavigate={navigate} onUserUpdate={handleUserUpdate} />;
   }
 
   // Default: redirect logged-in users to dashboard

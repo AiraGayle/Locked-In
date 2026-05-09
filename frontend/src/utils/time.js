@@ -10,6 +10,7 @@ const formatDuration = (seconds) => {
 };
 
 const formatDate = (dateString) => {
+  if (!dateString || isNaN(new Date(dateString))) return '—';
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -32,4 +33,15 @@ const intervalToSeconds = (interval) => {
   return Number(hrs) * 3600 + Number(mins) * 60 + Number(secs);
 };
 
-export { formatDuration, formatDate, formatTime, intervalToSeconds };
+const formatFocusTime = (seconds) => {
+  const s = Math.floor(Number(seconds || 0));
+  const hours = Math.floor(s / 3600);
+  const mins  = Math.floor((s % 3600) / 60);
+  const secs  = s % 60;
+
+  if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
+  if (mins  > 0) return `${mins}m ${secs}s`;
+  return `${secs}s`;
+};
+
+export { formatDuration, formatDate, formatTime, intervalToSeconds, formatFocusTime };
