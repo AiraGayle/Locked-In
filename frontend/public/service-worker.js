@@ -24,46 +24,17 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  const url = new URL(event.request.url);
 
-  // Skip non-GET and chrome-extension requests
-  if (request.method !== 'GET' || url.protocol === 'chrome-extension:') return;
-
-  // API calls: network-first, return offline error if no connection
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() =>
-        new Response(JSON.stringify({ error: 'Offline' }), {
-          status: 503,
-          headers: { 'Content-Type': 'application/json' },
-        })
-      )
-    );
+  if (url.pathname.startsWith('/auth') ||
+      url.pathname.startsWith('/rooms') ||
+      url.pathname.startsWith('/sessions')) {
     return;
   }
 
-  // JS/CSS/images: cache-first, then network + save to cache
-  if (
-    url.pathname.match(/\.(js|css|png|svg|ico|woff2?)$/) ||
-    url.pathname.startsWith('/assets/')
-  ) {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-            return response;
-          })
-      )
-    );
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
-  // HTML pages: network-first, fallback to /index.html
   event.respondWith(
-    fetch(request).catch(() => caches.match('/index.html'))
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
