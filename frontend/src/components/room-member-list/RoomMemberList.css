@@ -85,10 +85,12 @@
 
 .member-timer {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 15px;
   color: var(--color-text-secondary);
-  min-width: 50px;
+  min-width: 80px;
   text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .member-host-badge {
@@ -100,4 +102,76 @@
   text-transform: uppercase;
   font-weight: 600;
   flex-shrink: 0;
+}
+
+.member-kick-btn {
+  font-size: 11px;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.member-kick-btn:hover {
+  background: rgba(239, 68, 68, 0.22);
+}
+
+.member-list__close-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.member-list__close-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+.member-kick-btn {
+  font-size: 11px;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.member-kick-btn:hover {
+  background: rgba(239, 68, 68, 0.22);
+}
+
+.member-list__close-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.member-list__close-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
 }

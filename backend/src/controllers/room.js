@@ -3,6 +3,7 @@ import {
   joinRoom, leaveRoom, closeRoom, removeMember,
 } from '../services/room.js';
 import { sendSuccess, sendError } from '../utils/response.js';
+import { broadcastAll } from '../ws/ws-server.js';
 
 const getAllRooms = async (req, res) => {
   try {
@@ -56,6 +57,7 @@ const leaveExistingRoom = async (req, res) => {
 const closeExistingRoom = async (req, res) => {
   try {
     await closeRoom({ roomId: req.params.id, hostId: req.user.userId });
+    broadcastAll(req.params.id, { type: 'room:close', payload: {} });
     return sendSuccess(res, { message: 'Room closed' }, 200);
   } catch (err) {
     return sendError(res, 403, err.message);
@@ -64,11 +66,13 @@ const closeExistingRoom = async (req, res) => {
 
 const removeRoomMember = async (req, res) => {
   try {
+    const targetUserId = req.params.userId;
     await removeMember({
       roomId: req.params.id,
-      targetUserId: req.params.userId,
+      targetUserId,
       hostId: req.user.userId,
     });
+    broadcastAll(req.params.id, { type: 'user:removed', payload: { userId: targetUserId } });
     return sendSuccess(res, { message: 'Member removed' }, 200);
   } catch (err) {
     return sendError(res, 403, err.message);

@@ -14,7 +14,7 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
     // Lock in original target — needed for circle progress denominator across pause/resume
     send('timer:start', { userId: user.id, targetSeconds, startedAt, originalTargetSeconds: targetSeconds });
     setMembers((prev) =>
-      prev.map((m) => m.user_id === user.id
+      prev.map((m) => String(m.user_id) === String(user.id)
         ? { ...m, status: 'active', targetSeconds, startedAt, sessionStatus: 'ongoing', remainingSeconds: null, originalTargetSeconds: targetSeconds }
         : m)
     );
@@ -25,7 +25,7 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
       const remainingSeconds = clientSecondsLeft;
       send('timer:pause', { userId: user.id, remainingSeconds });
       setMembers((prev) =>
-        prev.map((m) => m.user_id === user.id
+        prev.map((m) => String(m.user_id) === String(user.id)
           ? { ...m, status: 'idle', startedAt: null, targetSeconds: remainingSeconds, remainingSeconds, sessionStatus: 'paused', originalTargetSeconds: m.originalTargetSeconds }
           : m)
       );
@@ -41,7 +41,7 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
       const startedAt = new Date(updated.start_time).getTime();
       setMembers((prev) =>
         prev.map((m) => {
-          if (m.user_id !== user.id) return m;
+          if (String(m.user_id) !== String(user.id)) return m;
           const originalTargetSeconds = m.originalTargetSeconds;
           send('timer:start', { userId: user.id, targetSeconds: remainingSeconds, startedAt, originalTargetSeconds });
           return { ...m, status: 'active', targetSeconds: remainingSeconds, startedAt, sessionStatus: 'ongoing', remainingSeconds: null, originalTargetSeconds };
@@ -66,7 +66,7 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
     setSessionData(null);
     send('timer:complete', { userId: user.id });
     setMembers((prev) =>
-      prev.map((m) => m.user_id === user.id
+      prev.map((m) => String(m.user_id) === String(user.id)
         ? { ...m, status: 'idle', startedAt: null, targetSeconds: null, remainingSeconds: null, sessionStatus: null }
         : m)
     );
@@ -78,7 +78,7 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
     setSessionData(null);
     send('timer:cancel', { userId: user.id });
     setMembers((prev) =>
-      prev.map((m) => m.user_id === user.id
+      prev.map((m) => String(m.user_id) === String(user.id)
         ? { ...m, status: 'idle', startedAt: null, targetSeconds: null, remainingSeconds: null, sessionStatus: null }
         : m)
     );

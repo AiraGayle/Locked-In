@@ -94,7 +94,8 @@ const initWsServer = (httpServer) => {
     }
 
     addToRoom(roomId, userId, ws);
-    broadcastAll(roomId, { type: 'user:join', payload: { userId } });
+    // Notify OTHER members only — the joining user gets their own data from fetchRoom
+    broadcast(roomId, userId, { type: 'user:join', payload: { userId } });
 
     ws.on('message', (data) => handleMessage(ws, userId, data));
 

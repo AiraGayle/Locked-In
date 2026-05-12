@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Timer from '../../components/timer/Timer.jsx';
 import RoomMemberList from '../../components/room-member-list/RoomMemberList.jsx';
-import { getRoom, leaveRoom } from '../../services/room.js';
+import RoomAlerts from '../../modals/RoomAlerts.jsx';
+import { getRoom, leaveRoom, closeRoom, removeMember } from '../../services/room.js';
 import { cancelSession } from '../../services/session.js';
-import { connect, disconnect, send } from '../../services/ws-client.js';
+import { connect, disconnect, send, on, off } from '../../services/ws-client.js';
 import { isOnline, onReconnect, onDisconnect } from '../../utils/sw.js';
 import { useRoomMembers } from '../../hooks/room-members.js';
 import { useTimerHandlers } from '../../hooks/timer-handler.js';
@@ -18,72 +19,70 @@ const Room = ({ user, roomId, onNavigate }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCopied, setShowCopied] = useState(false);
+  const [showKickedModal, setShowKickedModal] = useState(false);
+  const [showRoomClosedModal, setShowRoomClosedModal] = useState(false);
   const copyTimeoutRef = useRef(null);
-  const { members, setMembers } = useRoomMembers(user.id, roomId, onNavigate);
+  const alertTimeoutRef = useRef(null);
+
+  const { members, setMembers } = useRoomMembers(
+    user.id, roomId, onNavigate, () => setShowKickedModal(true)
+  );
 
   const fetchRoom = useCallback(async () => {
     try {
       const data = await getRoom(roomId);
       setRoom(data);
-      
-      // Restore session state for current user
-      const currentUserMember = data.members.find(m => m.user_id === user.id);
-      if (currentUserMember && currentUserMember.session_id) {
-        setSessionId(currentUserMember.session_id);
-        setSessionData({
-          id: currentUserMember.session_id,
-          remaining_time_secs: currentUserMember.remainingSeconds
-        });
-        
-        // If session is ongoing, calculate startedAt based on remaining time
-        if (currentUserMember.sessionStatus === 'ongoing' && currentUserMember.startedAt) {
-          const elapsed = Math.floor((Date.now() - currentUserMember.startedAt) / 1000);
-          const remaining = Math.max(0, currentUserMember.targetSeconds - elapsed);
-          // Update member with current remaining time
-          const updatedMember = {
-            ...currentUserMember,
-            targetSeconds: currentUserMember.targetSeconds,
-            startedAt: currentUserMember.startedAt
-          };
-          setMembers(data.members.map(m => m.user_id === user.id ? updatedMember : m));
-        } else {
-          setMembers(data.members);
-        }
-      } else {
-        setMembers(data.members);
+      setMembers(data.members);
+      const mine = data.members.find((m) => String(m.user_id) === String(user.id));
+      if (mine?.session_id) {
+        setSessionId(mine.session_id);
+        setSessionData({ id: mine.session_id, remaining_time_secs: mine.remainingSeconds });
       }
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, [roomId, user.id]);
+  }, [roomId, user.id, setMembers]);
 
   useEffect(() => {
     fetchRoom();
     connect(roomId);
-    const removeOffline = onDisconnect(() => setIsOffline(true));
 
+    const handleRoomKick = ({ targetUserId }) => {
+      if (String(targetUserId) === String(user.id)) setShowKickedModal(true);
+    };
+
+    const handleRoomClose = () => {
+      setShowRoomClosedModal(true);
+    };
+
+    on('room:kick', handleRoomKick);
+    on('room:close', handleRoomClose);
+
+    const removeOffline = onDisconnect(() => setIsOffline(true));
     const removeOnline = onReconnect(() => setIsOffline(false));
+
     return () => {
+      off('room:kick', handleRoomKick);
+      off('room:close', handleRoomClose);
       disconnect();
       removeOffline();
       removeOnline();
       clearTimeout(copyTimeoutRef.current);
+      clearTimeout(alertTimeoutRef.current);
     };
-  }, [roomId, fetchRoom]);
+  }, [roomId, fetchRoom, user.id]);
 
-  const { handleTimerStart, handleTimerPause, handleTimerResume, handleTimerComplete, handleTimerCancel } = useTimerHandlers(
-    roomId, user, sessionId, setSessionId, setSessionData, setMembers
-  );
+  const { handleTimerStart, handleTimerPause, handleTimerResume, handleTimerComplete, handleTimerCancel } =
+    useTimerHandlers(roomId, user, sessionId, setSessionId, setSessionData, setMembers);
 
   const handleCopyCode = async () => {
-    if (room?.invite_code) {
-      await navigator.clipboard.writeText(room.invite_code);
-      setShowCopied(true);
-      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
-      copyTimeoutRef.current = setTimeout(() => setShowCopied(false), 2000);
-    }
+    if (!room?.invite_code) return;
+    await navigator.clipboard.writeText(room.invite_code);
+    setShowCopied(true);
+    clearTimeout(copyTimeoutRef.current);
+    copyTimeoutRef.current = setTimeout(() => setShowCopied(false), 2000);
   };
 
   const handleQuit = async () => {
@@ -93,32 +92,64 @@ const Room = ({ user, roomId, onNavigate }) => {
     onNavigate('/dashboard');
   };
 
-  // Calculate current timer state
+  const handleAlertClose = () => {
+    clearTimeout(alertTimeoutRef.current);
+    setShowKickedModal(false);
+    setShowRoomClosedModal(false);
+    onNavigate('/dashboard');
+  };
+
+  useEffect(() => {
+    if (showKickedModal || showRoomClosedModal) {
+      alertTimeoutRef.current = setTimeout(() => {
+        setShowKickedModal(false);
+        setShowRoomClosedModal(false);
+        onNavigate('/dashboard');
+      }, 4000);
+    }
+
+    return () => clearTimeout(alertTimeoutRef.current);
+  }, [showKickedModal, showRoomClosedModal, onNavigate]);
+
+  const isHost = members.find((m) => String(m.user_id) === String(user.id))?.role === 'host';
+
+  const handleKickMember = async (targetUserId) => {
+    try {
+      await removeMember(roomId, targetUserId);
+      send('room:kick', { targetUserId });
+    } catch (err) {
+      console.error('Failed to kick member:', err.message);
+    }
+  };
+
+  const handleCloseRoom = async () => {
+    try {
+      if (sessionId) await cancelSession(sessionId);
+      await closeRoom(roomId);
+      send('room:close', {});
+      disconnect();
+      setShowRoomClosedModal(true);
+    } catch (err) {
+      console.error('Failed to close room:', err.message);
+    }
+  };
+
   const timerState = useTimerState(members, user);
 
-  if (isLoading) {
-    return <div className="room room--state"><p>Loading room...</p></div>;
-  }
-
-  if (error) {
-    return (
-      <div className="room room--state">
-        <p>{error}</p>
-        <button onClick={() => onNavigate('/dashboard')}>Back to dashboard</button>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="room room--state"><p>Loading room...</p></div>;
+  if (error) return (
+    <div className="room room--state">
+      <p>{error}</p>
+      <button onClick={() => onNavigate('/dashboard')}>Back to dashboard</button>
+    </div>
+  );
 
   return (
     <div className="room">
-      {isOffline && (
-        <div className="room__offline-banner">
-          You're offline — timer is still running
-        </div>
-      )}
+      {isOffline && <div className="room__offline-banner">You're offline — timer is still running</div>}
 
       <header className="room__header">
-        <button className="room__back-btn" onClick={() => {onNavigate('/dashboard'); handleTimerCancel();}}>
+        <button className="room__back-btn" onClick={() => { onNavigate('/dashboard'); handleTimerCancel(); }}>
           Back
         </button>
         <div className="room__header-center">
@@ -142,15 +173,22 @@ const Room = ({ user, roomId, onNavigate }) => {
             initialSecondsLeft={timerState.secondsLeft}
             initialMode={timerState.mode}
           />
-          <button className="room__quit-btn" onClick={handleQuit}>
-            Quit room
-          </button>
+          <button className="room__quit-btn" onClick={handleQuit}>Quit room</button>
         </section>
 
         <aside className="room__sidebar">
-          <RoomMemberList members={members} userId={user.id} />
+          <RoomMemberList
+            members={members}
+            userId={user.id}
+            isHost={isHost}
+            onKick={handleKickMember}
+            onCloseRoom={handleCloseRoom}
+          />
         </aside>
       </main>
+
+      {showKickedModal && <RoomAlerts type="kicked" onClose={handleAlertClose} />}
+      {showRoomClosedModal && <RoomAlerts type="closed" onClose={handleAlertClose} />}
     </div>
   );
 };

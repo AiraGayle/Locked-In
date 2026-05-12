@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 export const useTimerState = (members, user) => {
   return useMemo(() => {
-    const currentUserMember = members.find(m => m.user_id === user.id);
+    const currentUserMember = members.find(m => String(m.user_id) === String(user.id));
     if (!currentUserMember || !currentUserMember.session_id) {
       return { targetSeconds: 25 * 60, secondsLeft: 25 * 60, mode: 'idle', originalTargetSeconds: 25 * 60 };
     }

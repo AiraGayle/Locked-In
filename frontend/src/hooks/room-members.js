@@ -2,34 +2,41 @@ import { useState, useEffect } from 'react';
 import { on, off } from '../services/ws-client.js';
 import { getRoom } from '../services/room.js';
 
-export const useRoomMembers = (userId, roomId, onNavigate) => {
+export const useRoomMembers = (userId, roomId, onNavigate, onKicked) => {
   const [members, setMembers] = useState([]);
+
+  // Initial fetch — populate members on mount
+  useEffect(() => {
+    if (!roomId) return;
+    getRoom(roomId).then((data) => setMembers(data.members)).catch(console.error);
+  }, [roomId]);
 
   // Handle real-time WebSocket events
   useEffect(() => {
     const handleUserJoin = ({ userId, username }) => {
       setMembers((prev) => {
-        if (prev.some((m) => m.user_id === userId)) return prev;
+        if (prev.some((m) => String(m.user_id) === String(userId))) return prev;
         return [...prev, { user_id: userId, username, status: 'idle', role: 'member' }];
       });
     };
 
     const handleUserLeave = ({ userId }) => {
-      setMembers((prev) => prev.filter((m) => m.user_id !== userId));
+      setMembers((prev) => prev.filter((m) => String(m.user_id) !== String(userId)));
     };
 
     const handleUserRemoved = ({ userId: removedId }) => {
-      if (removedId === userId) { 
-        onNavigate('/dashboard');
+      if (String(removedId) === String(userId)) {
+        // Let room.jsx show the kicked modal first before navigating
+        onKicked ? onKicked() : onNavigate('/dashboard');
         return;
       }
-      setMembers((prev) => prev.filter((m) => m.user_id !== removedId));
+      setMembers((prev) => prev.filter((m) => String(m.user_id) !== String(removedId)));
     };
 
     const handleTimerStart = ({ userId, targetSeconds, startedAt, originalTargetSeconds }) => {
       setMembers((prev) =>
         prev.map((m) => {
-          if (m.user_id === userId) {
+          if (String(m.user_id) === String(userId)) {
             // Preserve originalTargetSeconds: use what WS sent, or fall back to existing, or use targetSeconds as last resort
             const origTarget = originalTargetSeconds || m.originalTargetSeconds || Number(targetSeconds);
             return { ...m, status: 'active', targetSeconds: Number(targetSeconds), startedAt, sessionStatus: 'ongoing', remainingSeconds: null, originalTargetSeconds: origTarget };
@@ -42,7 +49,7 @@ export const useRoomMembers = (userId, roomId, onNavigate) => {
     const handleTimerEnd = ({ userId }) => {
       setMembers((prev) =>
         prev.map((m) =>
-          m.user_id === userId
+          String(m.user_id) === String(userId)
             ? { ...m, status: 'idle', startedAt: null, targetSeconds: null, remainingSeconds: null, sessionStatus: null, originalTargetSeconds: null }
             : m
         )
@@ -52,7 +59,7 @@ export const useRoomMembers = (userId, roomId, onNavigate) => {
     const handleTimerPause = ({ userId, remainingSeconds }) => {
       setMembers((prev) =>
         prev.map((m) =>
-          m.user_id === userId
+          String(m.user_id) === String(userId)
             ? { ...m, status: 'idle', startedAt: null, targetSeconds: remainingSeconds, remainingSeconds, sessionStatus: 'paused', originalTargetSeconds: m.originalTargetSeconds }
             : m
         )

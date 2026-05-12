@@ -10,6 +10,12 @@
   margin-top: 4px;
 }
 
+.room-modal__message {
+  margin: 16px 0;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
 .room-modal__cancel-btn {
   background: transparent;
   color: var(--color-text-secondary);
