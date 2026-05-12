@@ -60,6 +60,8 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
   const handleCreate = async (name) => {
     const room = await createRoom(name);
     setRooms((prev) => [room, ...prev]);
+    setIsShowingCreateModal(false);
+    onNavigate(`/room/${room.id}`);
   };
 
   const handleJoin = async (inviteCode) => {
@@ -68,6 +70,8 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
       const alreadyIn = prev.some((r) => r.id === room.id);
       return alreadyIn ? prev : [room, ...prev];
     });
+    setIsShowingJoinModal(false);
+    onNavigate(`/room/${room.id}`);
   };
 
   const handleEnterRoom = (room) => {
