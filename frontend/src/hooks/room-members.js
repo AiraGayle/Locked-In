@@ -13,11 +13,10 @@ export const useRoomMembers = (userId, roomId, onNavigate, onKicked) => {
 
   // Handle real-time WebSocket events
   useEffect(() => {
-    const handleUserJoin = ({ userId, username }) => {
-      setMembers((prev) => {
-        if (prev.some((m) => String(m.user_id) === String(userId))) return prev;
-        return [...prev, { user_id: userId, username, status: 'idle', role: 'member' }];
-      });
+    const handleUserJoin = () => {
+      // Refetch the full room to get the joining member's username, avatar, role etc.
+      // The WS user:join payload only contains userId — not enough to render the row.
+      getRoom(roomId).then((data) => setMembers(data.members)).catch(console.error);
     };
 
     const handleUserLeave = ({ userId }) => {

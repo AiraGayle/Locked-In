@@ -22,7 +22,6 @@ const Room = ({ user, roomId, onNavigate }) => {
   const [showKickedModal, setShowKickedModal] = useState(false);
   const [showRoomClosedModal, setShowRoomClosedModal] = useState(false);
   const copyTimeoutRef = useRef(null);
-  const alertTimeoutRef = useRef(null);
 
   const { members, setMembers } = useRoomMembers(
     user.id, roomId, onNavigate, () => setShowKickedModal(true)
@@ -66,11 +65,15 @@ const Room = ({ user, roomId, onNavigate }) => {
     return () => {
       off('room:kick', handleRoomKick);
       off('room:close', handleRoomClose);
-      disconnect();
+      // Do NOT disconnect here. For intentional quit, handleQuit already called
+      // disconnect() (code 1000) before navigating, so the socket is already null.
+      // For back-button navigation, we intentionally leave the socket open so the
+      // server never sets room_members.status = 'left' and the room stays visible
+      // on the dashboard. connect() will close this stale socket (code 4000) the
+      // next time the user enters a room.
       removeOffline();
       removeOnline();
       clearTimeout(copyTimeoutRef.current);
-      clearTimeout(alertTimeoutRef.current);
     };
   }, [roomId, fetchRoom, user.id]);
 
@@ -93,23 +96,11 @@ const Room = ({ user, roomId, onNavigate }) => {
   };
 
   const handleAlertClose = () => {
-    clearTimeout(alertTimeoutRef.current);
     setShowKickedModal(false);
     setShowRoomClosedModal(false);
     onNavigate('/dashboard');
   };
 
-  useEffect(() => {
-    if (showKickedModal || showRoomClosedModal) {
-      alertTimeoutRef.current = setTimeout(() => {
-        setShowKickedModal(false);
-        setShowRoomClosedModal(false);
-        onNavigate('/dashboard');
-      }, 4000);
-    }
-
-    return () => clearTimeout(alertTimeoutRef.current);
-  }, [showKickedModal, showRoomClosedModal, onNavigate]);
 
   const isHost = members.find((m) => String(m.user_id) === String(user.id))?.role === 'host';
 
@@ -136,7 +127,6 @@ const Room = ({ user, roomId, onNavigate }) => {
 
   const timerState = useTimerState(members, user);
 
-  if (isLoading) return <div className="room room--state"><p>Loading room...</p></div>;
   if (error) return (
     <div className="room room--state">
       <p>{error}</p>
@@ -149,13 +139,15 @@ const Room = ({ user, roomId, onNavigate }) => {
       {isOffline && <div className="room__offline-banner">You're offline — timer is still running</div>}
 
       <header className="room__header">
-        <button className="room__back-btn" onClick={() => { onNavigate('/dashboard'); handleTimerCancel(); }}>
+        <button className="room__back-btn" onClick={() => onNavigate('/dashboard')}>
           Back
         </button>
         <div className="room__header-center">
-          <h2 className="room__title">{room?.name}</h2>
-          <button className="room__invite-code" onClick={handleCopyCode}>
-            #{room?.invite_code}
+          <h2 className="room__title">
+            {isLoading ? <span className="skeleton skeleton--room-title" /> : room?.name}
+          </h2>
+          <button className="room__invite-code" onClick={handleCopyCode} disabled={isLoading}>
+            {isLoading ? <span className="skeleton skeleton--invite-code" /> : `#${room?.invite_code}`}
             {showCopied && <span className="room__invite-copied">copied!</span>}
           </button>
         </div>
@@ -184,6 +176,7 @@ const Room = ({ user, roomId, onNavigate }) => {
             isHost={isHost}
             onKick={handleKickMember}
             onCloseRoom={handleCloseRoom}
+            isLoading={isLoading}
           />
         </aside>
       </main>

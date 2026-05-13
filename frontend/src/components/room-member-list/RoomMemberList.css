@@ -118,9 +118,7 @@
   transition: background 0.15s;
 }
 
-.member-kick-btn:hover {
-  background: rgba(239, 68, 68, 0.22);
-}
+.member-kick-btn:hover { background: rgba(239, 68, 68, 0.22); }
 
 .member-list__close-btn {
   margin-top: 16px;
@@ -136,42 +134,29 @@
   transition: background 0.15s;
 }
 
-.member-list__close-btn:hover {
-  background: rgba(239, 68, 68, 0.18);
+.member-list__close-btn:hover { background: rgba(239, 68, 68, 0.18); }
+
+/* Skeleton loading */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-.member-kick-btn {
-  font-size: 11px;
-  padding: 4px 8px;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 25%,
+    rgba(255, 255, 255, 0.06) 50%,
+    var(--color-bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
   border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  text-transform: uppercase;
-  flex-shrink: 0;
-  transition: background 0.15s;
 }
 
-.member-kick-btn:hover {
-  background: rgba(239, 68, 68, 0.22);
-}
-
-.member-list__close-btn {
-  margin-top: 16px;
-  width: 100%;
-  padding: 10px;
-  background: rgba(239, 68, 68, 0.08);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: background 0.15s;
-}
-
-.member-list__close-btn:hover {
-  background: rgba(239, 68, 68, 0.18);
-}
+.skeleton--avatar  { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+.skeleton--name    { width: 100px; height: 13px; }
+.skeleton--status  { width: 48px; height: 11px; margin-top: 2px; }
+.skeleton--title   { display: inline-block; width: 140px; height: 12px; vertical-align: middle; }
+.skeleton--room-title  { display: inline-block; width: 120px; height: 18px; vertical-align: middle; }
+.skeleton--invite-code { display: inline-block; width: 72px;  height: 13px; vertical-align: middle; }

@@ -4,11 +4,11 @@ import './RoomModal.css';
 const alertMessages = {
   kicked: {
     title: 'Removed from room',
-    body: 'You have been removed from this room by the host. Redirecting you to the dashboard.',
+    body: 'You have been removed from this room by the host.',
   },
   closed: {
     title: 'Room closed',
-    body: 'This room has been closed. Redirecting you to the dashboard.',
+    body: 'This room has been closed by the host.',
   },
 };
 

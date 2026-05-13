@@ -107,23 +107,36 @@ const MemberItem = ({ member, isCurrentUser, isHost, onKick }) => {
   )
 };
 
-const RoomMemberList = ({ members, userId, isHost, onKick, onCloseRoom }) => (
+const SkeletonMemberItem = () => (
+  <div className="member-item member-item--skeleton">
+    <div className="skeleton skeleton--avatar" />
+    <div className="member-info">
+      <div className="skeleton skeleton--name" />
+      <div className="skeleton skeleton--status" />
+    </div>
+  </div>
+);
+
+const RoomMemberList = ({ members, userId, isHost, onKick, onCloseRoom, isLoading }) => (
   <div className="member-list">
     <h3 className="member-list__title">
-      {members.length} {members.length === 1 ? 'person' : 'people'} in this room
+      {isLoading ? <span className="skeleton skeleton--title" /> : `${members.length} ${members.length === 1 ? 'person' : 'people'} in this room`}
     </h3>
     <div className="member-list__items">
-      {members.map((member) => (
-        <MemberItem
-          key={member.user_id}
-          member={member}
-          isCurrentUser={String(member.user_id) === String(userId)}
-          isHost={isHost}
-          onKick={onKick}
-        />
-      ))}
+      {isLoading
+        ? [1, 2, 3].map((i) => <SkeletonMemberItem key={i} />)
+        : members.map((member) => (
+            <MemberItem
+              key={member.user_id}
+              member={member}
+              isCurrentUser={String(member.user_id) === String(userId)}
+              isHost={isHost}
+              onKick={onKick}
+            />
+          ))
+      }
     </div>
-    {isHost && (
+    {!isLoading && isHost && (
       <button className="member-list__close-btn" onClick={onCloseRoom}>
         Close room
       </button>
