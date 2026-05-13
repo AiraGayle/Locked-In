@@ -9,6 +9,19 @@ const formatDuration = (seconds) => {
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 };
 
+const formatTimerDuration = (seconds) => {
+  const safeSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+  const hrs = Math.floor(safeSeconds / 3600);
+  const mins = Math.floor((safeSeconds % 3600) / 60);
+  const secs = safeSeconds % 60;
+
+  if (hrs > 0) {
+    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
+
 const formatDate = (dateString) => {
   if (!dateString || isNaN(new Date(dateString))) return '—';
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -44,4 +57,4 @@ const formatFocusTime = (seconds) => {
   return `${secs}s`;
 };
 
-export { formatDuration, formatDate, formatTime, intervalToSeconds, formatFocusTime };
+export { formatDuration, formatTimerDuration, formatDate, formatTime, intervalToSeconds, formatFocusTime };

@@ -23,6 +23,7 @@ const getUserRooms = async (userId) => {
      JOIN room_members rm ON rm.room_id = r.id
      WHERE rm.user_id = $1
        AND rm.status <> 'removed'
+       AND rm.status <> 'left'
        AND r.status = 'active'
      ORDER BY r.created_at DESC`,
     [userId]

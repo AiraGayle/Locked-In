@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import jwt from 'jsonwebtoken';
 import { parse } from 'url';
+import { leaveRoom } from '../services/room.js';
 
 const rooms = new Map();
 
@@ -102,6 +103,7 @@ const initWsServer = (httpServer) => {
     ws.on('close', () => {
       removeFromRoom(roomId, userId);
       broadcastAll(roomId, { type: 'user:leave', payload: { userId } });
+      leaveRoom({ roomId, userId }).catch(console.error);
     });
   });
 

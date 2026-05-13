@@ -48,6 +48,7 @@ const joinExistingRoom = async (req, res) => {
 const leaveExistingRoom = async (req, res) => {
   try {
     await leaveRoom({ roomId: req.params.id, userId: req.user.userId });
+    broadcastAll(req.params.id, { type: 'user:leave', payload: { userId: req.user.userId } });
     return sendSuccess(res, { message: 'Left room successfully' }, 200);
   } catch (err) {
     return sendError(res, 500, err.message);

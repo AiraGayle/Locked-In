@@ -30,20 +30,19 @@ const MemberTimer = ({ startedAt, targetSeconds, remainingSeconds, isPaused }) =
     }
   }, [isPaused, remainingSeconds, targetSeconds]);
 
-  // Effect 2: countdown interval — only depends on startedAt/targetSeconds/isPaused.
-  // Removing remainingSeconds from deps means periodic DB syncs that update
-  // remainingSeconds won't clear and restart the interval mid-countdown.
+  // Effect 2: countdown interval — recalc from startedAt each tick so
+  // watcher views stay real-time and adjust cleanly on pause/resume updates.
   useEffect(() => {
     if (!targetSeconds || isPaused) return;
     if (!startedAt) return;
 
-    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-    const initial = Math.max(0, Number(targetSeconds) - elapsed);
-    setSecondsLeft(initial);
+    const update = () => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      setSecondsLeft(Math.max(0, Number(targetSeconds) - elapsed));
+    };
 
-    const interval = setInterval(() => {
-      setSecondsLeft((prev) => Math.max(0, prev - 1));
-    }, 1000);
+    update();
+    const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
   }, [startedAt, targetSeconds, isPaused]);
 

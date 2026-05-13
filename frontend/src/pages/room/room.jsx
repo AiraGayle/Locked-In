@@ -171,9 +171,10 @@ const Room = ({ user, roomId, onNavigate }) => {
             onCancel={handleTimerCancel}
             initialTargetSeconds={timerState.targetSeconds}
             initialSecondsLeft={timerState.secondsLeft}
+            initialProgressSeconds={timerState.originalTargetSeconds}
             initialMode={timerState.mode}
           />
-          <button className="room__quit-btn" onClick={handleQuit}>Quit room</button>
+          <button className="room__quit-btn" onClick={handleQuit}>Leave room</button>
         </section>
 
         <aside className="room__sidebar">

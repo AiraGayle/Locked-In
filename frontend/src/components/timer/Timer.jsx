@@ -1,36 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { formatDuration } from '../../utils/time.js';
+import { useCallback } from 'react';
+import { formatTimerDuration } from '../../utils/time.js';
+import { useTimer } from './useTimer.js';
 import './Timer.css';
 
-const CIRCLE_RADIUS = 90;
-const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
 const DEFAULT_MINUTES = 25;
-const MAX_TIMER_SECONDS = 24 * 60 * 60;
-
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-
-const secondsToDurationFields = (seconds) => {
-  const safeSeconds = clamp(Number(seconds) || 0, 0, MAX_TIMER_SECONDS);
-
-  return {
-    hours: Math.floor(safeSeconds / 3600),
-    minutes: Math.floor((safeSeconds % 3600) / 60),
-    seconds: Math.floor(safeSeconds % 60),
-  };
-};
-
-const getDurationFieldValue = (value, max) => {
-  return clamp(Number(value) || 0, 0, max);
-};
-
-const getDurationTotalSeconds = ({ hours, minutes, seconds }) => {
-  const totalSeconds =
-    getDurationFieldValue(hours, 24) * 3600 +
-    getDurationFieldValue(minutes, 59) * 60 +
-    getDurationFieldValue(seconds, 59);
-
-  return clamp(totalSeconds, 1, MAX_TIMER_SECONDS);
-};
 
 const Timer = ({
   onStart,
@@ -42,125 +15,46 @@ const Timer = ({
   initialSecondsLeft = DEFAULT_MINUTES * 60,
   initialMode = 'idle',
 }) => {
-  const [totalSeconds, setTotalSeconds] = useState(initialTargetSeconds);
-  const [secondsLeft, setSecondsLeft] = useState(initialSecondsLeft);
-  const [mode, setMode] = useState(initialMode);
-  const [editDuration, setEditDuration] = useState(() => secondsToDurationFields(initialTargetSeconds));
-
-  const intervalRef = useRef(null);
-  const secondsLeftRef = useRef(initialSecondsLeft);
-
-  const clearTimerInterval = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }, []);
-
-  const updateSecondsLeft = useCallback((value) => {
-    setSecondsLeft((prev) => {
-      const next = typeof value === 'function' ? value(prev) : value;
-      secondsLeftRef.current = next;
-      return next;
-    });
-  }, []);
-
-  // Sync external updates safely
-  useEffect(() => {
-    setTotalSeconds(initialTargetSeconds);
-    updateSecondsLeft(initialSecondsLeft);
-    setMode(initialMode);
-    setEditDuration(secondsToDurationFields(initialTargetSeconds));
-  }, [
+  const {
+    totalSeconds,
+    secondsLeft,
+    mode,
+    editDuration,
+    handleEdit,
+    handleEditCancel,
+    handleEditSave,
+    handleEditChange,
+    handleEditKeyDown,
+    handlePause: pauseTimer,
+    handleResume: resumeTimer,
+    handleCancel: cancelTimer,
+    handleStart: startTimer,
+  } = useTimer({
     initialTargetSeconds,
     initialSecondsLeft,
     initialMode,
-    updateSecondsLeft
-  ]);
+    onComplete,
+  });
 
-  const progress = totalSeconds > 0 ? secondsLeft / totalSeconds : 0;
-
-  const clampedProgress = Math.min(1, Math.max(0, progress));
-
-  const strokeDashoffset =
-    CIRCLE_CIRCUMFERENCE * (1 - clampedProgress);
-
-  // Timer loop
-  useEffect(() => {
-    if (mode !== 'running') return;
-
-    intervalRef.current = setInterval(() => {
-      updateSecondsLeft((prev) => {
-        if (prev <= 1) {
-          clearTimerInterval();
-          setMode('idle');
-          onComplete?.();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return clearTimerInterval;
-  }, [mode, onComplete, clearTimerInterval, updateSecondsLeft]);
-
-  const handleStart = async () => {
-    const nextSeconds = mode === 'editing'
-      ? getDurationTotalSeconds(editDuration)
-      : secondsLeft;
-
-    setMode('running');
-    setTotalSeconds(nextSeconds);
-    updateSecondsLeft(nextSeconds);
+  const handleStart = useCallback(async () => {
+    const nextSeconds = await startTimer();
     await onStart?.(nextSeconds);
-  };
+  }, [onStart, startTimer]);
 
-  const handlePause = async () => {
-    clearTimerInterval();
-    const pausedSeconds = secondsLeftRef.current;
+  const handlePause = useCallback(async () => {
+    await pauseTimer();
+    await onPause?.(secondsLeft);
+  }, [onPause, pauseTimer, secondsLeft]);
 
-    setMode('paused');
-    updateSecondsLeft(pausedSeconds);
-    await onPause?.(pausedSeconds);
-  };
-
-  const handleResume = async () => {
-    setMode('running');
+  const handleResume = useCallback(async () => {
+    await resumeTimer();
     await onResume?.();
-  };
+  }, [onResume, resumeTimer]);
 
-  const handleCancel = async () => {
-    clearTimerInterval();
-    setMode('idle');
-    updateSecondsLeft(totalSeconds);
+  const handleCancel = useCallback(async () => {
+    await cancelTimer();
     await onCancel?.();
-  };
-
-  const handleEdit = () => {
-    setMode('editing');
-  };
-
-  const handleEditCancel = () => {
-    setMode('idle');
-    setEditDuration(secondsToDurationFields(totalSeconds));
-  };
-
-  const handleEditSave = () => {
-    const secs = getDurationTotalSeconds(editDuration);
-
-    setTotalSeconds(secs);
-    updateSecondsLeft(secs);
-    setMode('idle');
-  };
-
-  const handleEditChange = (field, value) => {
-    setEditDuration((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleEditKeyDown = (e) => {
-    if (e.key === 'Enter') handleEditSave();
-    if (e.key === 'Escape') handleEditCancel();
-  };
+  }, [cancelTimer, onCancel]);
 
   return (
     <div className="timer">
@@ -170,7 +64,7 @@ const Timer = ({
             className="timer__ring-track"
             cx="100"
             cy="100"
-            r={CIRCLE_RADIUS}
+            r="90"
             fill="none"
             strokeWidth="8"
           />
@@ -178,18 +72,18 @@ const Timer = ({
             className="timer__ring-progress"
             cx="100"
             cy="100"
-            r={CIRCLE_RADIUS}
+            r="90"
             fill="none"
             strokeWidth="8"
-            strokeDasharray={CIRCLE_CIRCUMFERENCE}
-            strokeDashoffset={strokeDashoffset}
+            strokeDasharray={2 * Math.PI * 90}
+            strokeDashoffset={2 * Math.PI * 90 * (1 - (totalSeconds > 0 ? secondsLeft / totalSeconds : 0))}
             strokeLinecap="round"
             transform="rotate(-90 100 100)"
           />
         </svg>
 
         <span className="timer__display">
-          {formatDuration(secondsLeft)}
+          {formatTimerDuration(secondsLeft)}
         </span>
       </div>
 

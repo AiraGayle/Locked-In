@@ -16,7 +16,7 @@ const StatCard = ({ label, value }) => (
   </div>
 );
 
-const DashboardPage = ({ user, onLogout, onNavigate }) => {
+const DashboardPage = ({ user, onLogout, onNavigate, isLoadingUser = false }) => {
   const [rooms, setRooms] = useState([]);
   const [stats, setStats] = useState(null);
   const [isLoadingRooms, setIsLoadingRooms] = useState(true);
@@ -100,7 +100,7 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
       />
 
       <main className="dashboard-page__main">
-        <p className="dashboard-page__welcome">Welcome back, {user.username}</p>
+        <p className="dashboard-page__welcome">Welcome back, {user?.username || '...'}</p>
 
         <section className="dashboard-page__stats-section">
           <StatCard
@@ -138,7 +138,12 @@ const DashboardPage = ({ user, onLogout, onNavigate }) => {
 
           {error && <p className="dashboard-page__error">{error}</p>}
 
-          {isLoadingRooms ? (
+          {isLoadingUser ? (
+            <div className="dashboard-page__loading dashboard-page__loading--spinner">
+              <div className="dashboard-page__spinner" />
+              <p>Loading your dashboard…</p>
+            </div>
+          ) : isLoadingRooms ? (
             <div className="dashboard-page__loading">Loading rooms...</div>
           ) : rooms.length === 0 ? (
             <div className="dashboard-page__empty">
