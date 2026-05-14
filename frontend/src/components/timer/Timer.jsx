@@ -14,6 +14,8 @@ const Timer = ({
   initialTargetSeconds = DEFAULT_MINUTES * 60,
   initialSecondsLeft = DEFAULT_MINUTES * 60,
   initialMode = 'idle',
+  roomId,
+  user
 }) => {
   const {
     totalSeconds,
@@ -34,6 +36,8 @@ const Timer = ({
     initialSecondsLeft,
     initialMode,
     onComplete,
+    roomId,
+    user
   });
 
   const handleStart = useCallback(async () => {

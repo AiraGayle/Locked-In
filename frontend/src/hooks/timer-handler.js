@@ -2,58 +2,125 @@ import { startSession, pauseSession, resumeSession, completeSession, cancelSessi
 import { send } from '../services/ws-client.js';
 import { useRef } from 'react';
 
-export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessionData, setMembers) => {
+export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessionData, members, setMembers) => {
   const isCompletingRef = useRef(false);
-  
+
   const handleTimerStart = async (targetSeconds) => {
+    const startedAt = Date.now();
+
     const session = await startSession(roomId, targetSeconds);
     setSessionId(session.id);
     setSessionData(session);
-    // Use server start_time so WS and DB always agree on startedAt
-    const startedAt = new Date(session.start_time).getTime();
-    // Lock in original target — needed for circle progress denominator across pause/resume
-    send('timer:start', { userId: user.id, targetSeconds, startedAt, originalTargetSeconds: targetSeconds });
+
+    send('timer:start', {
+      userId: user.id,
+      targetSeconds,
+      startedAt,
+      originalTargetSeconds: targetSeconds,
+      remainingSeconds: targetSeconds, // ✅ FIXED (was undefined before)
+    });
+
     setMembers((prev) =>
-      prev.map((m) => String(m.user_id) === String(user.id)
-        ? { ...m, status: 'active', targetSeconds, startedAt, sessionStatus: 'ongoing', remainingSeconds: null, originalTargetSeconds: targetSeconds }
-        : m)
+      prev.map((m) =>
+        String(m.user_id) === String(user.id)
+          ? {
+              ...m,
+              status: 'active',
+              targetSeconds,
+              startedAt,
+              sessionStatus: 'ongoing',
+
+              originalTargetSeconds: targetSeconds,
+
+              // IMPORTANT: do NOT use as truth source
+              remainingSeconds: null,
+            }
+          : m
+      )
     );
   };
 
   const handleTimerPause = async (clientSecondsLeft) => {
-    if (sessionId) {
-      const remainingSeconds = clientSecondsLeft;
-      send('timer:pause', { userId: user.id, remainingSeconds });
-      setMembers((prev) =>
-        prev.map((m) => String(m.user_id) === String(user.id)
-          ? { ...m, status: 'idle', startedAt: null, targetSeconds: remainingSeconds, remainingSeconds, sessionStatus: 'paused', originalTargetSeconds: m.originalTargetSeconds }
-          : m)
-      );
-      await pauseSession(sessionId);
-    }
+    if (!sessionId) return;
+
+    const remainingSeconds = clientSecondsLeft;
+
+    send('timer:pause', {
+      userId: user.id,
+      remainingSeconds,
+    });
+
+    setMembers((prev) =>
+      prev.map((m) =>
+        String(m.user_id) === String(user.id)
+          ? {
+              ...m,
+              status: 'idle',
+              startedAt: null,
+
+              sessionStatus: 'paused',
+
+              // KEEP BASE DURATION SAFE
+              targetSeconds: m.originalTargetSeconds,
+
+              remainingSeconds,
+              originalTargetSeconds: m.originalTargetSeconds,
+            }
+          : m
+      )
+    );
+
+    await pauseSession(sessionId);
   };
 
   const handleTimerResume = async () => {
-    if (sessionId) {
-      const updated = await resumeSession(sessionId);
-      setSessionData(updated);
-      const remainingSeconds = updated.remaining_time_secs;
-      const startedAt = new Date(updated.start_time).getTime();
-      setMembers((prev) =>
-        prev.map((m) => {
-          if (String(m.user_id) !== String(user.id)) return m;
-          const originalTargetSeconds = m.originalTargetSeconds;
-          send('timer:start', { userId: user.id, targetSeconds: remainingSeconds, startedAt, originalTargetSeconds });
-          return { ...m, status: 'active', targetSeconds: remainingSeconds, startedAt, sessionStatus: 'ongoing', remainingSeconds: null, originalTargetSeconds };
-        })
-      );
-    }
+    if (!sessionId) return;
+
+    const startedAt = Date.now();
+    const updated = await resumeSession(sessionId);
+
+    setSessionData(updated);
+
+    const remainingSeconds = updated.remaining_time_secs;
+
+    const mine = members.find(
+      (m) => String(m.user_id) === String(user.id)
+    );
+
+    const originalTargetSeconds = mine?.originalTargetSeconds;
+
+    setMembers((prev) =>
+      prev.map((m) =>
+        String(m.user_id) === String(user.id)
+          ? {
+              ...m,
+              status: 'active',
+              targetSeconds: originalTargetSeconds,
+              startedAt,
+              sessionStatus: 'ongoing',
+
+              originalTargetSeconds,
+
+              remainingSeconds: null,
+            }
+          : m
+      )
+    );
+
+    send('timer:start', {
+      userId: user.id,
+      targetSeconds: originalTargetSeconds,
+      startedAt,
+      originalTargetSeconds,
+      remainingSeconds: originalTargetSeconds,
+    });
+
+    return startedAt;
   };
 
   const handleTimerComplete = async () => {
-    if (!sessionId || isCompletingRef.current) return; // guard
+    if (!sessionId || isCompletingRef.current) return;
     isCompletingRef.current = true;
-
     try {
       await completeSession(sessionId);
     } catch (err) {
@@ -61,14 +128,16 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
     } finally {
       isCompletingRef.current = false;
     }
-    
     setSessionId(null);
     setSessionData(null);
     send('timer:complete', { userId: user.id });
     setMembers((prev) =>
-      prev.map((m) => String(m.user_id) === String(user.id)
-        ? { ...m, status: 'idle', startedAt: null, targetSeconds: null, remainingSeconds: null, sessionStatus: null }
-        : m)
+      prev.map((m) => {
+        if (String(m.user_id) !== String(user.id)) return m;
+        // Preserve originalTargetSeconds so the timer resets to the last-set
+        // duration (not 25:00) after the session completes.
+        return { ...m, status: 'idle', startedAt: null, session_id: null, targetSeconds: m.originalTargetSeconds, remainingSeconds: null, sessionStatus: null };
+      })
     );
   };
 
@@ -79,7 +148,7 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
     send('timer:cancel', { userId: user.id });
     setMembers((prev) =>
       prev.map((m) => String(m.user_id) === String(user.id)
-        ? { ...m, status: 'idle', startedAt: null, targetSeconds: null, remainingSeconds: null, sessionStatus: null }
+        ? { ...m, status: 'idle', startedAt: null, session_id: null, targetSeconds: m.originalTargetSeconds, remainingSeconds: null, sessionStatus: null }
         : m)
     );
   };

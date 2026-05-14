@@ -80,7 +80,38 @@ const App = () => {
   }
 
   if (isLoadingUser) {
-    return <div className="app-loading">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-zinc-950 p-6 animate-pulse">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <div className="h-12 w-64 bg-zinc-800 rounded-xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-zinc-900 rounded-3xl p-8 space-y-6">
+              <div className="h-24 w-24 rounded-full bg-zinc-800 mx-auto" />
+              <div className="h-16 w-48 bg-zinc-800 rounded-xl mx-auto" />
+              <div className="flex justify-center gap-4">
+                <div className="h-12 w-24 bg-zinc-800 rounded-xl" />
+                <div className="h-12 w-24 bg-zinc-800 rounded-xl" />
+                <div className="h-12 w-24 bg-zinc-800 rounded-xl" />
+              </div>
+            </div>
+            <div className="bg-zinc-900 rounded-3xl p-6 space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3"
+                >
+                  <div className="h-10 w-10 rounded-full bg-zinc-800" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 bg-zinc-800 rounded" />
+                    <div className="h-3 w-20 bg-zinc-800 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {

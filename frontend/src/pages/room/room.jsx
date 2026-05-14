@@ -78,7 +78,7 @@ const Room = ({ user, roomId, onNavigate }) => {
   }, [roomId, fetchRoom, user.id]);
 
   const { handleTimerStart, handleTimerPause, handleTimerResume, handleTimerComplete, handleTimerCancel } =
-    useTimerHandlers(roomId, user, sessionId, setSessionId, setSessionData, setMembers);
+    useTimerHandlers(roomId, user, sessionId, setSessionId, setSessionData, members, setMembers);
 
   const handleCopyCode = async () => {
     if (!room?.invite_code) return;
@@ -125,7 +125,14 @@ const Room = ({ user, roomId, onNavigate }) => {
     }
   };
 
-  const timerState = useTimerState(members, user);
+  const isMembersLoaded = members !== undefined && members !== null;
+
+  const timerState = useTimerState(
+    members,
+    user,
+    roomId,
+    isMembersLoaded
+  );
 
   if (error) return (
     <div className="room room--state">
@@ -163,8 +170,10 @@ const Room = ({ user, roomId, onNavigate }) => {
             onCancel={handleTimerCancel}
             initialTargetSeconds={timerState.targetSeconds}
             initialSecondsLeft={timerState.secondsLeft}
-            initialProgressSeconds={timerState.originalTargetSeconds}
+            initialOriginalSeconds={timerState.originalTargetSeconds}
             initialMode={timerState.mode}
+            roomId={roomId}
+            user={user}
           />
           <button className="room__quit-btn" onClick={handleQuit}>Leave room</button>
         </section>

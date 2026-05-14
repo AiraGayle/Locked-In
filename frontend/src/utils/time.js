@@ -1,7 +1,8 @@
 const formatDuration = (seconds) => {
-  const hrs = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = Math.floor(seconds % 60);
+  const safe = Math.max(0, Math.floor(Number(seconds) || 0));
+  const hrs = Math.floor(safe / 3600);
+  const mins = Math.floor((safe % 3600) / 60);
+  const secs = Math.floor(safe % 60);
 
   if (hrs > 0) {
     return `${hrs}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
@@ -57,4 +58,39 @@ const formatFocusTime = (seconds) => {
   return `${secs}s`;
 };
 
-export { formatDuration, formatTimerDuration, formatDate, formatTime, intervalToSeconds, formatFocusTime };
+const MAX_TIMER_SECONDS = 24 * 60 * 60;
+
+const clamp = (value, min, max) =>
+  Math.min(max, Math.max(min, value));
+
+const parseTimerField = (value) =>
+  clamp(Number(value) || 0, 0, MAX_TIMER_SECONDS);
+
+const secondsToDurationFields = (seconds) => {
+  const safeSeconds = clamp(
+    Number(seconds) || 0,
+    0,
+    MAX_TIMER_SECONDS
+  );
+
+  return {
+    hours: Math.floor(safeSeconds / 3600),
+    minutes: Math.floor((safeSeconds % 3600) / 60),
+    seconds: Math.floor(safeSeconds % 60),
+  };
+};
+
+const durationFieldsToSeconds = ({
+  hours,
+  minutes,
+  seconds,
+}) => {
+  const totalSeconds =
+    parseTimerField(hours) * 3600 +
+    parseTimerField(minutes) * 60 +
+    parseTimerField(seconds);
+
+  return clamp(totalSeconds || 1, 1, MAX_TIMER_SECONDS);
+};
+
+export { formatDuration, formatTimerDuration, formatDate, formatTime, intervalToSeconds, formatFocusTime, clamp, parseTimerField, secondsToDurationFields, durationFieldsToSeconds };
