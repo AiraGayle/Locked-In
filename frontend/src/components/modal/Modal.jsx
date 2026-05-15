@@ -1,4 +1,3 @@
-import Modal from '../components/modal/Modal.jsx';
 import './modals.css';
 
 const Modal = ({ title, onClose, children }) => {
