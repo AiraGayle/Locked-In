@@ -90,14 +90,17 @@
 
 .profile-card__avatar-wrap {
   position: relative;
-  display: inline-block;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: visible;
   flex-shrink: 0;
 }
 
 .profile-card__avatar-edit-btn {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: -4px;
+  right: -4px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -109,45 +112,31 @@
   align-items: center;
   justify-content: center;
   padding: 0;
+  z-index: 3;
+  box-shadow: 0 0 0 2px var(--color-bg);
 }
 
 .profile-card__avatar-img {
-  width: 64px;
-  height: 64px;
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center;
 }
 
 .profile-card__avatar-overlay {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
   background: rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-size: 12px;
-}
-
-.profile-card__name-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.profile-card__name-edit-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  padding: 2px;
-  display: flex;
-  align-items: center;
-}
-
-.profile-card__name-edit-btn:hover {
-  color: var(--color-text-primary);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
 }
 
 .profile-card__name-input {
@@ -160,25 +149,6 @@
   padding: 3px 8px;
   width: 160px;
 }
-.profile-card__save-btn {
-  font-size: 12px;
-  padding: 3px 10px;
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.profile-card__cancel-btn {
-  font-size: 12px;
-  padding: 3px 10px;
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
 
 @media (max-width: 1024px) {
   .dashboard {
@@ -190,6 +160,11 @@
 
   .profile-card {
     padding: 16px 18px;
+  }
+
+  .profile-card__avatar-wrap {
+    width: 60px;
+    height: 60px;
   }
 
   .profile-card__avatar {
