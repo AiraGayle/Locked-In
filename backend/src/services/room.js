@@ -19,16 +19,27 @@ const createRoom = async ({ name, hostId }) => {
 
 const getUserRooms = async (userId) => {
   const result = await query(
-    `SELECT r.* FROM rooms r
+    `SELECT 
+        r.*,
+        EXISTS (
+          SELECT 1
+          FROM room_members active_rm
+          WHERE active_rm.room_id = r.id
+            AND active_rm.status IN ('active', 'idle')
+        ) AS has_active_members
+     FROM rooms r
      JOIN room_members rm ON rm.room_id = r.id
      WHERE rm.user_id = $1
        AND rm.status <> 'removed'
-       AND rm.status <> 'left'
        AND r.status = 'active'
      ORDER BY r.created_at DESC`,
     [userId]
   );
-  return result.rows;
+
+  return result.rows.map(room => ({
+    ...room,
+    has_active_members: room.has_active_members
+  }));
 };
 
 const getRoomById = async (roomId, userId) => {

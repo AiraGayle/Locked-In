@@ -31,10 +31,18 @@ const broadcast = (roomId, senderId, message) => {
 const broadcastAll = (roomId, message) => {
   const clients = getRoomClients(roomId);
   const data = JSON.stringify(message);
+
   clients.forEach((client) => {
     if (client.ws.readyState === 1) {
       client.ws.send(data);
     }
+  });
+};
+
+const broadcastDashboardUpdate = () => {
+  broadcastAll('__dashboard__', {
+    type: 'roomsUpdated',
+    payload: {}
   });
 };
 
@@ -112,4 +120,4 @@ const initWsServer = (httpServer) => {
   console.log('[ws] WebSocket server initialized');
 };
 
-export { initWsServer, broadcast, broadcastAll };
+export { initWsServer, broadcast, broadcastAll, broadcastDashboardUpdate };

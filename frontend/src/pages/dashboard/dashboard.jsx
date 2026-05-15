@@ -7,6 +7,7 @@ import { logout } from '../../services/auth.js';
 import { formatFocusTime } from '../../utils/time.js';
 import { useActiveSessions } from '../../hooks/active-session.js';
 import Navbar from '../../components/navbar/Navbar.jsx';
+import { connectDashboard, disconnect, on, off } from '../../services/ws-client.js';
 import './dashboard.css';
 
 const StatCard = ({ label, value }) => (
@@ -55,6 +56,21 @@ const DashboardPage = ({ user, onLogout, onNavigate, isLoadingUser = false }) =>
   useEffect(() => {
     fetchRooms();
     fetchStats();
+
+    // Connect dashboard websocket
+    connectDashboard();
+
+    const handleRoomsUpdated = async () => {
+      await fetchRooms();
+    };
+
+    // Listen for backend updates
+    on('roomsUpdated', handleRoomsUpdated);
+
+    return () => {
+      off('roomsUpdated', handleRoomsUpdated);
+      disconnect();
+    };
   }, []);
 
   const handleCreate = async (name) => {

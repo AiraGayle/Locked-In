@@ -23,6 +23,42 @@ const connect = (roomId) => {
   socket.onerror = (err) => console.error('[ws] Error:', err);
 };
 
+const connectDashboard = () => {
+  if (socket) {
+    socket.close(4000);
+    socket = null;
+  }
+
+  currentRoomId = '__dashboard__';
+
+  socket = new WebSocket(
+    `${WS_URL}?token=${getToken()}&roomId=__dashboard__`
+  );
+
+  socket.onopen = () => {
+    console.log('[ws] Connected to dashboard');
+  };
+
+  socket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+
+    const handlers = listeners[message.type] || [];
+
+    handlers.forEach((handler) =>
+      handler(message.payload)
+    );
+  };
+
+  socket.onclose = () => {
+    console.log('[ws] Dashboard disconnected');
+    currentRoomId = null;
+  };
+
+  socket.onerror = (err) => {
+    console.error('[ws] Error:', err);
+  };
+};
+
 // Intentional leave (quit button). Code 1000 = normal closure;
 // the server will call leaveRoom and set room_members.status = 'left'.
 const disconnect = () => {
@@ -45,4 +81,4 @@ const off = (type, handler) => {
   listeners[type] = listeners[type].filter((h) => h !== handler);
 };
 
-export { connect, disconnect, send, on, off };
+export { connect, connectDashboard, disconnect, send, on, off };

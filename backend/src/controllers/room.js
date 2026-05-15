@@ -3,7 +3,7 @@ import {
   joinRoom, leaveRoom, closeRoom, removeMember,
 } from '../services/room.js';
 import { sendSuccess, sendError } from '../utils/response.js';
-import { broadcastAll } from '../ws/ws-server.js'; // used by closeExistingRoom and removeRoomMember
+import { broadcastAll } from '../ws/ws-server.js';
 
 const getAllRooms = async (req, res) => {
   try {

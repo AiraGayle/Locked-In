@@ -1,22 +1,36 @@
 import { memo } from 'react';
 import './RoomCard.css';
 
-const StatusDot = memo(({ status }) => (
-  <span className={`room-card__dot room-card__dot--${status}`} />
-));
+const StatusDot = memo(({ visible, status }) => {
+  if (!visible) return null;
+
+  return (
+    <span className={`room-card__dot room-card__dot--${status}`} />
+  );
+});
 
 StatusDot.displayName = 'StatusDot';
 
 const RoomCard = memo(({ room, onJoin, activeUserTimer }) => {
   const isActive = room.status === 'active';
 
+  // NEW:
+  const hasPeopleInside = room.has_active_members;
+
   return (
     <div className="room-card">
       <div className="room-card__top">
         <span className="room-card__name">{room.name}</span>
-        <StatusDot status={room.status} />
+
+        {/* Only show green dot if room has active members */}
+        <StatusDot
+          visible={hasPeopleInside}
+          status={room.status}
+        />
       </div>
+
       <p className="room-card__code">#{room.invite_code}</p>
+
       <div className="room-card__footer">
         <button
           className="room-card__join-btn"
@@ -29,7 +43,6 @@ const RoomCard = memo(({ room, onJoin, activeUserTimer }) => {
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Only re-render if room or activeUserTimer changed
   return (
     prevProps.room === nextProps.room &&
     prevProps.activeUserTimer === nextProps.activeUserTimer

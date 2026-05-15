@@ -1,9 +1,11 @@
 import cron from 'node-cron';
 import { query } from '../config/db.js';
+import { broadcastDashboardUpdate } from '../ws/ws-server.js';
 
 const closeEmptyRooms = async () => {
   const result = await query(
-    `UPDATE rooms SET status = 'closed'
+    `UPDATE rooms
+     SET status = 'closed'
      WHERE status = 'active'
        AND empty_since IS NOT NULL
        AND empty_since <= NOW() - INTERVAL '10 minutes'
@@ -11,8 +13,16 @@ const closeEmptyRooms = async () => {
   );
 
   if (result.rows.length > 0) {
-    console.log(`[cron] Closed ${result.rows.length} empty room(s):`, result.rows.map(r => r.name));
-  } 
+    console.log(
+      `[cron] Closed ${result.rows.length} empty room(s):`,
+      result.rows.map((r) => r.name)
+    );
+
+    // REAL-TIME dashboard refresh
+    broadcastDashboardUpdate();
+  } else {
+    console.log('[cron] No empty rooms to close.');
+  }
 };
 
 const startCleanRoomsJob = () => {
