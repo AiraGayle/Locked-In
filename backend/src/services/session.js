@@ -44,7 +44,7 @@ const pauseSession = async ({ sessionId, userId }) => {
 
 const resumeSession = async ({ sessionId, userId }) => {
   const result = await query(
-    `UPDATE focus_sessions SET status = 'ongoing', start_time = NOW(), target_time = remaining_time
+    `UPDATE focus_sessions SET status = 'ongoing', start_time = NOW()
      WHERE id = $1 AND user_id = $2 AND status = 'paused' RETURNING *, EXTRACT(EPOCH FROM target_time) AS target_time_secs, EXTRACT(EPOCH FROM remaining_time) AS remaining_time_secs`,
     [sessionId, userId]
   );
@@ -56,7 +56,7 @@ const resumeSession = async ({ sessionId, userId }) => {
 const completeSession = async ({ sessionId, userId }) => {
   const result = await query(
     `UPDATE focus_sessions SET status = 'completed', end_time = NOW(), remaining_time = '0'
-     WHERE id = $1 AND user_id = $2 AND status IN ('ongoing', 'paused') RETURNING *`,
+     WHERE id = $1 AND user_id = $2 AND status IN ('ongoing', 'paused') RETURNING *, EXTRACT(EPOCH FROM target_time) AS target_time_secs, EXTRACT(EPOCH FROM remaining_time) AS remaining_time_secs`,
     [sessionId, userId]
   );
   if (result.rows.length === 0) throw new Error('Session not found or already ended');
@@ -67,7 +67,7 @@ const completeSession = async ({ sessionId, userId }) => {
 const cancelSession = async ({ sessionId, userId }) => {
   const result = await query(
     `UPDATE focus_sessions SET status = 'cancelled', end_time = NOW()
-     WHERE id = $1 AND user_id = $2 AND status IN ('ongoing', 'paused') RETURNING *`,
+     WHERE id = $1 AND user_id = $2 AND status IN ('ongoing', 'paused') RETURNING *, EXTRACT(EPOCH FROM target_time) AS target_time_secs, EXTRACT(EPOCH FROM remaining_time) AS remaining_time_secs`,
     [sessionId, userId]
   );
   if (result.rows.length === 0) throw new Error('Session not found or already ended');
