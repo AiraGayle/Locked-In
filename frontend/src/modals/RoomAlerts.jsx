@@ -1,3 +1,4 @@
+import Modal from '../components/modal/Modal.jsx';
 import './modals.css';
 
 const alertMessages = {
