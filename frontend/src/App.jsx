@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getMe } from './services/auth.js';
-import LoginPage from './pages/login/login.jsx';
-import DashboardPage from './pages/dashboard/dashboard.jsx';
-import RoomPage from './pages/room/room.jsx';
-import StatsPage from './pages/stats/stats.jsx';
-import ResetPassword from './pages/login/resetPass.jsx';
+import { getMe, logout as authLogout } from './services/auth.js';
+import Login from './pages/auth/login.jsx';
+import Dashboard from './pages/dashboard/dashboard.jsx';
+import Room from './pages/room/room.jsx';
+import Stats from './pages/stats/stats.jsx';
+import ResetPassword from './pages/auth/reset-pass.jsx';
 
 const getPath = () => window.location.pathname;
 
@@ -30,11 +30,7 @@ const App = () => {
   useEffect(() => {
     const initAuth = async () => {
       const token = sessionStorage.getItem('token');
-      if (!token) {
-        setIsLoadingUser(false);
-        return;
-      }
-
+      if (!token) { setIsLoadingUser(false); return; }
       try {
         const currentUser = await getMe();
         sessionStorage.setItem('user', JSON.stringify(currentUser));
@@ -48,29 +44,33 @@ const App = () => {
         setIsLoadingUser(false);
       }
     };
-
     initAuth();
   }, []);
 
   const handleLogin = (userData) => {
-    sessionStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     navigate('/dashboard');
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('user');
+  const handleLogout = async () => {
+    await authLogout();   
     setUser(null);
     navigate('/');
   };
 
+  const handleUserUpdate = (updatedFields) => {
+    const updated = { ...user, ...updatedFields };
+    sessionStorage.setItem('user', JSON.stringify(updated));
+    setUser(updated);
+  };
+
   if (path === '/forgot-password') {
-    return <ResetPassword />;
+    return <ResetPassword onNavigate={navigate} />;
   }
 
   if (isLoadingUser && path === '/dashboard') {
     return (
-      <DashboardPage
+      <Dashboard
         user={user || { username: '' }}
         onLogout={handleLogout}
         onNavigate={navigate}
@@ -115,40 +115,23 @@ const App = () => {
   }
 
   if (!user) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <Login onLogin={handleLogin} />;
   }
 
   if (path === '/dashboard') {
-    return <DashboardPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
+    return <Dashboard user={user} onLogout={handleLogout} onNavigate={navigate} />;
   }
 
   if (path.startsWith('/room/')) {
     const roomId = path.split('/')[2];
-
-    return (
-      <RoomPage
-        user={user}
-        roomId={roomId}
-        onLogout={handleLogout}
-        onNavigate={navigate}
-      />
-    );
+    return <Room user={user} roomId={roomId} onLogout={handleLogout} onNavigate={navigate} />;
   }
-
-  const handleUserUpdate = (updatedFields) => {
-    setUser(prev => {
-      const updated = { ...prev, ...updatedFields };
-      sessionStorage.setItem('user', JSON.stringify(updated));
-      return updated;
-    });
-  };
 
   if (path === '/stats') {
-    return <StatsPage user={user} onLogout={handleLogout} onNavigate={navigate} onUserUpdate={handleUserUpdate} />;
+    return <Stats user={user} onLogout={handleLogout} onNavigate={navigate} onUserUpdate={handleUserUpdate} />;
   }
 
-  // Default: redirect logged-in users to dashboard
-  return <DashboardPage user={user} onLogout={handleLogout} onNavigate={navigate} />;
+  return <Dashboard user={user} onLogout={handleLogout} onNavigate={navigate} />;
 };
 
-export default App; 
+export default App;

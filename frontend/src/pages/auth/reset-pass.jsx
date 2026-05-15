@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import './login.css';
+import { resetPassword } from '../../services/auth.js';
+import logo from '/logo.png';
+import './auth.css';
 
-export default function ResetPassword() {
+export default function ResetPassword({ onNavigate }) {
   const token = new URLSearchParams(window.location.search).get('token');
 
   const [newPassword, setNewPassword] = useState('');
@@ -21,20 +23,9 @@ export default function ResetPassword() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? 'Something went wrong.');
-
+      await resetPassword({ token, newPassword });
       setSuccess('Password reset successfully. Redirecting to login...');
-      setTimeout(() => {
-        window.history.pushState({}, '', '/');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }, 2000);
+      setTimeout(() => onNavigate('/'), 2000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -42,12 +33,16 @@ export default function ResetPassword() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !loading) handleSubmit();
+  };
+
   return (
     <div className="login-page" style={{ width: '100vw', height: '100vh' }}>
-      <div className="login-page__banner" />
-      <div className="login-page__card">
-        <div className="login-page__form">
+      <img src={logo} alt="Locked-In Logo" className="login-page__logo" />
 
+      <div className="login-page__card">
+        <div className="login-page__form" onKeyDown={handleKeyDown}>
           <div className="form-field">
             <label htmlFor="newPassword">New Password:</label>
             <input
@@ -55,6 +50,7 @@ export default function ResetPassword() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              autoFocus
             />
           </div>
 
@@ -76,19 +72,15 @@ export default function ResetPassword() {
             onClick={handleSubmit}
             disabled={loading || !!success}
           >
-            {loading ? 'Please wait...' : 'RESET PASSWORD'}
+            {success ? 'Redirecting...' : loading ? 'Please wait...' : 'RESET PASSWORD'}
           </button>
 
           <button
             className="login-page__forgot-link"
-            onClick={() => {
-              window.history.pushState({}, '', '/');
-              window.dispatchEvent(new PopStateEvent('popstate'));
-            }}
+            onClick={() => onNavigate('/')}
           >
             Back to login
           </button>
-
         </div>
       </div>
     </div>

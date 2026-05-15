@@ -1,4 +1,4 @@
-import { query } from '../db/db.js';
+import { query } from '../config/db.js';
 import { randomBytes } from 'crypto';
 
 const generateInviteCode = () => randomBytes(4).toString('hex').toUpperCase();

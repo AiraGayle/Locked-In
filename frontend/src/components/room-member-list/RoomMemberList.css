@@ -154,9 +154,41 @@
   border-radius: 4px;
 }
 
-.skeleton--avatar  { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
-.skeleton--name    { width: 100px; height: 13px; }
-.skeleton--status  { width: 48px; height: 11px; margin-top: 2px; }
-.skeleton--title   { display: inline-block; width: 140px; height: 12px; vertical-align: middle; }
-.skeleton--room-title  { display: inline-block; width: 120px; height: 18px; vertical-align: middle; }
-.skeleton--invite-code { display: inline-block; width: 72px;  height: 13px; vertical-align: middle; }
+.skeleton--avatar { 
+  width: 36px; 
+  height: 36px; 
+  border-radius: 50%; 
+  flex-shrink: 0; 
+}
+
+.skeleton--name { 
+  width: 100px; 
+  height: 13px; 
+}
+
+.skeleton--status { 
+  width: 48px; 
+  height: 11px; 
+  margin-top: 2px; 
+}
+
+.skeleton--title { 
+  display: inline-block; 
+  width: 140px; 
+  height: 12px; 
+  vertical-align: middle; 
+}
+
+.skeleton--room-title { 
+  display: inline-block; 
+  width: 120px; 
+  height: 18px; 
+  vertical-align: middle; 
+}
+
+.skeleton--invite-code { 
+  display: inline-block; 
+  width: 72px;  
+  height: 13px; 
+  vertical-align: middle; 
+}

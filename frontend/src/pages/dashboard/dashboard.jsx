@@ -17,7 +17,7 @@ const StatCard = ({ label, value }) => (
   </div>
 );
 
-const DashboardPage = ({ user, onLogout, onNavigate, isLoadingUser = false }) => {
+const Dashboard = ({ user, onLogout, onNavigate, isLoadingUser = false }) => {
   const [rooms, setRooms] = useState([]);
   const [stats, setStats] = useState(null);
   const [isLoadingRooms, setIsLoadingRooms] = useState(true);
@@ -56,17 +56,13 @@ const DashboardPage = ({ user, onLogout, onNavigate, isLoadingUser = false }) =>
   useEffect(() => {
     fetchRooms();
     fetchStats();
-
-    // Connect dashboard websocket
     connectDashboard();
 
     const handleRoomsUpdated = async () => {
       await fetchRooms();
     };
 
-    // Listen for backend updates
     on('roomsUpdated', handleRoomsUpdated);
-
     return () => {
       off('roomsUpdated', handleRoomsUpdated);
       disconnect();
@@ -106,7 +102,7 @@ const DashboardPage = ({ user, onLogout, onNavigate, isLoadingUser = false }) =>
   return (
     <div className="dashboard-page">
       <Navbar
-        title="Focus Room"
+        title="Locked-In"
         leftButtons={[
           { label: 'Stats', onClick: () => onNavigate('/stats') },
         ]}
@@ -199,4 +195,4 @@ const DashboardPage = ({ user, onLogout, onNavigate, isLoadingUser = false }) =>
   );
 };
 
-export default DashboardPage;
+export default Dashboard;

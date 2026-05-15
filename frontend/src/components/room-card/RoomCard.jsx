@@ -14,7 +14,6 @@ StatusDot.displayName = 'StatusDot';
 const RoomCard = memo(({ room, onJoin, activeUserTimer }) => {
   const isActive = room.status === 'active';
 
-  // NEW:
   const hasPeopleInside = room.has_active_members;
 
   return (

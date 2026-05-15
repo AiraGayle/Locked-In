@@ -74,6 +74,7 @@ export const forgotPass = async (req, res) => {
     const result = await forgotPassword(email);
     return sendSuccess(res, result);
   } catch (err) {
+    console.error('Forgot password error:', err); // add this
     return sendError(res, err.statusCode ?? 500, err.message ?? 'Internal server error');
   }
 };

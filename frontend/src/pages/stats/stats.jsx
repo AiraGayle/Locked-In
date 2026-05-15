@@ -9,7 +9,7 @@ import { formatFocusTime } from '../../utils/time';
 import { useState, useEffect } from 'react';
 import { getStats } from '../../services/session';
 
-const StatsPage = ( { onNavigate, user, onUserUpdate }) => {
+const Stats = ( { onNavigate, user, onUserUpdate }) => {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,4 +61,4 @@ const StatsPage = ( { onNavigate, user, onUserUpdate }) => {
   );
 };
 
-export default StatsPage;
+export default Stats;

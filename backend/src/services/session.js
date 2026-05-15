@@ -1,4 +1,4 @@
-import { query } from '../db/db.js';
+import { query } from '../config/db.js';
 
 const completed_session_status = 'completed';
 

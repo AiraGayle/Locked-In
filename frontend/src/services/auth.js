@@ -19,11 +19,13 @@ export const logout = async () => {
     await post('/auth/logout');
   } finally {
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
   }
 };
 
 export const getMe = async () => {
   const data = await get('/auth/me');
+  sessionStorage.setItem('user', JSON.stringify(data.user ?? data));
   return data;
 };
 
@@ -37,4 +39,8 @@ export const getCurrentUser = () => {
 export const forgotPassword = async ({ email }) => {
   const data = await post('/auth/forgot-password', { email });
   return data;
+};
+
+export const resetPassword = async ({ token, newPassword }) => {
+  return await post('/auth/reset-password', { token, newPassword });
 };

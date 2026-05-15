@@ -1,5 +1,5 @@
 import Modal from '../components/modal/modal.jsx';
-import './RoomModal.css';
+import './modals.css';
 
 const alertMessages = {
   kicked: {

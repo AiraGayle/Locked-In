@@ -20,7 +20,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/rooms', roomRoutes);
 app.use('/sessions', sessionRoutes);
-app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

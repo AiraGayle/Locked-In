@@ -1,4 +1,4 @@
-# Focus Room
+# Locked-In
 
 A real-time collaborative productivity web app where users join shared virtual rooms and run synchronized focus timers together.
 
@@ -6,7 +6,7 @@ A real-time collaborative productivity web app where users join shared virtual r
 
 ## Features
 
-- **Room System** — Create or join focus rooms using a unique, shareable invite code
+- **Room System** — Create or join Locked-Ins using a unique, shareable invite code
 - **Real-Time Presence** — View all active participants and their timer status (active, paused, completed)
 - **Personal Timers** — Start, pause, and complete focus sessions synced live across all room members
 - **Session History** — Automatically stored per-user focus sessions for long-term productivity tracking
@@ -107,7 +107,7 @@ npm run dev
 Expected output:
 
 ```
-[nodemon] starting `node src/app.js`
+[nodemon] starting `node src/index.js`
 Server running on port 3000
 [cron] CleanRooms job scheduled (every hour)
 ```
@@ -136,82 +136,92 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 focus-room/
 ├── backend/
 │   ├── migrations/         # SQL files — run once to create DB tables
+│   │   ├── create-users.sql
+│   │   ├── create-rooms.sql
+│   │   ├── create-room-members.sql
+│   │   └── create-focus-sessions.sql
 │   └── src/
 │       ├── config/
-│       │   └── db.js       # PostgreSQL pool connection
+│       │   ├── db.js       # PostgreSQL pool connection
+│       │   └── cloudinary.js # Cloudinary configuration
 │       ├── controllers/    # Read req, call service, send res
 │       │   ├── auth.js
-│       │   ├── rooms.js
-│       │   ├── sessions.js
+│       │   ├── room.js
+│       │   ├── session.js
+│       │   └── users.js
 │       ├── jobs/
-│       │   └── cleanRooms.js # Cron job — removes empty/expired rooms
+│       │   └── clean-rooms.js # Cron job — removes empty/expired rooms
 │       ├── middleware/
-│       │   └── authenticate.js # JWT auth guard
+│       │   └── auth.js     # JWT auth guard
 │       ├── routes/
 │       │   ├── auth.js
-│       │   ├── rooms.js
-│       │   ├── sessions.js
+│       │   ├── room.js
+│       │   ├── session.js
+│       │   └── users.js
 │       ├── services/
-│       │   └── websocket.js # WebSocket server + broadcast logic
+│       │   ├── api-client.js
+│       │   ├── auth.js
+│       │   ├── room.js
+│       │   ├── session.js
+│       │   └── users.js
 │       ├── utils/
-│       │   └── inviteCode.js # Invite code generator
+│       │   ├── mailer.js   # Email utility
+│       │   └── response.js # Response helper
+│       ├── ws/
+│       │   └── ws-server.js # WebSocket server + broadcast logic
 │       └── index.js         # Entry point
 └── frontend/
+    ├── public/
+    │   └── service-worker.js # PWA service worker
+    └── src/
+        ├── cards/           # Reusable card components
+        ├── components/      # UI components
+        │   ├── modal/
+        │   ├── navbar/
+        │   ├── room-card/
+        │   ├── room-member-list/
+        │   ├── stat-card/
+        │   └── timer/
+        ├── hooks/           # Custom React hooks
+        │   ├── active-session.js
+        │   ├── room-members.js
+        │   ├── timer-handler.js
+        │   └── timer-state.js
+        ├── modals/          # Modal components
+        ├── pages/           # Page components
+        │   ├── auth/
+        │   ├── dashboard/
+        │   ├── room/
+        │   └── stats/
+        ├── services/        # API and WebSocket clients
+        │   ├── api-client.js
+        │   ├── auth.js
+        │   ├── room.js
+        │   ├── session.js
+        │   ├── users.js
+        │   └── ws-client.js
+        ├── utils/           # Utility functions
+        │   ├── sw.js        # Service worker utilities
+        │   └── time.js      # Time formatting utilities
+        ├── App.jsx          # Main app component
+        ├── index.css        # Global styles
+        └── main.jsx         # App entry point
 ```
 
 ---
 
-## What Still Needs to Be Built
+### Useful Commands
 
-Each file in `backend/src/` has inline `// TODO` comments marking exactly what to implement. Here's the high-level breakdown by feature:
+```bash
+# Backend development
+cd backend && npm run dev
 
-### Authentication (`src/routes/auth.js`, `src/controllers/auth.js`, `src/middleware/authenticate.js`)
+# Frontend development  
+cd frontend && npm run dev
 
-- `POST /api/auth/register` — hash password with bcrypt, insert user, return JWT
-- `POST /api/auth/login` — verify credentials, return JWT
-- `GET /api/auth/me` — return current user from token
-- JWT middleware that protects all private routes
+# Frontend build for production
+cd frontend && npm run build
 
-### Rooms (`src/routes/rooms.js`, `src/controllers/rooms.js`, `src/utils/inviteCode.js`)
-
-- `POST /api/rooms` — create room, generate unique invite code
-- `POST /api/rooms/join` — join by invite code
-- `GET /api/rooms/:roomId` — get room + member list
-- `DELETE /api/rooms/:roomId/leave` — leave room
-- `DELETE /api/rooms/:roomId/members/:userId` — kick member (owner only)
-
-### WebSocket (`src/services/websocket.js`, `src/index.js`)
-
-- Attach WebSocket server to the existing HTTP server (share the same port)
-- Authenticate connections via token in query string
-- Handle message types: `TIMER_START`, `TIMER_PAUSE`, `TIMER_COMPLETE`, `TIMER_SYNC_REQUEST`
-- Broadcast timer state changes to all members in the same room
-- Broadcast `MEMBER_LEFT` on disconnect
-
-### Sessions (`src/routes/sessions.js`, `src/controllers/sessions.js`)
-
-- `POST /api/sessions/start` — log session start
-- `POST /api/sessions/end` — mark complete, store duration
-- `GET /api/sessions` — return session history for current user
-
-### Stats (`src/routes/stats.js`, `src/controllers/stats.js`)
-
-- `GET /api/stats` — return total focus time, sessions per day (last 7 days), current streak
-- Design and connect the Stats page on the frontend
-
-### Room Cleanup (`src/jobs/cleanRooms.js`)
-
-- Cron job that runs hourly
-- Deletes rooms with no members or where all members have been inactive for over 1 hour
-- Import in `index.js` so it registers on startup
-
-### Offline Support (frontend)
-
-- Register a service worker so the app shell loads without internet
-- Keep the active timer running locally if the connection drops
-- Sync timer state back to the server on reconnect
-
-### Performance
-
-- Run a Lighthouse audit and target 90+ on Performance, Accessibility, and Best Practices
-- Lazy load routes to reduce initial bundle size
+# Database connection test
+psql -U postgres -d focus_room
+```

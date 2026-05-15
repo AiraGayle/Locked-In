@@ -71,7 +71,6 @@ export const forgotPassword = async (email) => {
     'SELECT id, email FROM users WHERE email = $1',
     [email]
   );
-  console.log(rows);
 
   if (!rows[0]) return { message: 'A reset link has been sent'};
 

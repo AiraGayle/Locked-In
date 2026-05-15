@@ -7,14 +7,14 @@ const DEFAULT = 25 * 60;
 
 export const useTimer = ({ initialTargetSeconds, initialSecondsLeft, initialOriginalSeconds, initialMode, onComplete, roomId, user }) => {
   const [totalSeconds, setTotalSeconds] = useState(initialTargetSeconds || DEFAULT);
-  const [secondsLeft, setSecondsLeft]   = useState(initialSecondsLeft  || DEFAULT);
-  const [mode, setMode]                 = useState(initialMode || 'idle');
+  const [secondsLeft, setSecondsLeft] = useState(initialSecondsLeft  || DEFAULT);
+  const [mode, setMode] = useState(initialMode || 'idle');
   const [editDuration, setEditDuration] = useState(() => secondsToDurationFields(initialTargetSeconds || DEFAULT));
 
-  const intervalRef        = useRef(null);
-  const startTimeRef       = useRef(null);
+  const intervalRef = useRef(null);
+  const startTimeRef = useRef(null);
   const originalSecondsRef = useRef(initialOriginalSeconds || initialTargetSeconds || DEFAULT);
-  const modeRef            = useRef(initialMode || 'idle');
+  const modeRef = useRef(initialMode || 'idle');
   const locallyFinishedRef = useRef(false);
 
   const clearTimerInterval = useCallback(() => {
