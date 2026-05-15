@@ -1,4 +1,4 @@
-import './modals.css';
+import './Modal.css';
 
 const Modal = ({ title, onClose, children }) => {
   const handleOverlayClick = (e) => {
