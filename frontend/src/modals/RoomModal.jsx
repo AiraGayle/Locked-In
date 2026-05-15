@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Modal from '../components/modal/modal.jsx';
+import Modal from '../components/modal/modal';
 import './modals.css';
 
 const RoomModal = ({ mode = 'join', onClose, onSubmit }) => {
