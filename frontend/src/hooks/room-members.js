@@ -38,7 +38,12 @@ export const useRoomMembers = (userId, roomId, onNavigate, onKicked) => {
     }) => {
       const resolvedTarget =
         Number(targetSeconds) ||
+        Number(remainingSeconds) ||
         Number(originalTargetSeconds) ||
+        25 * 60;
+      const resolvedOriginal =
+        Number(originalTargetSeconds) ||
+        Number(targetSeconds) ||
         Number(remainingSeconds) ||
         25 * 60;
 
@@ -53,7 +58,7 @@ export const useRoomMembers = (userId, roomId, onNavigate, onKicked) => {
             startedAt,
 
             targetSeconds: resolvedTarget,
-            originalTargetSeconds: resolvedTarget,
+            originalTargetSeconds: resolvedOriginal,
 
             // IMPORTANT: never undefined
             remainingSeconds: resolvedTarget,

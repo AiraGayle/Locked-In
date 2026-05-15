@@ -33,7 +33,9 @@ const logSession = async ({ userId, roomId, targetSeconds }) => {
 
 const pauseSession = async ({ sessionId, userId }) => {
   const result = await query(
-    `UPDATE focus_sessions SET status = 'paused', remaining_time = make_interval(secs := EXTRACT(EPOCH FROM (target_time - (NOW() - start_time))))
+    `UPDATE focus_sessions
+     SET status = 'paused',
+         remaining_time = make_interval(secs := GREATEST(0, EXTRACT(EPOCH FROM remaining_time) - EXTRACT(EPOCH FROM (NOW() - COALESCE(end_time, start_time)))))
      WHERE id = $1 AND user_id = $2 AND status = 'ongoing' RETURNING *, EXTRACT(EPOCH FROM target_time) AS target_time_secs, EXTRACT(EPOCH FROM remaining_time) AS remaining_time_secs`,
     [sessionId, userId]
   );
@@ -43,20 +45,16 @@ const pauseSession = async ({ sessionId, userId }) => {
 };
 
 const resumeSession = async ({ sessionId, userId }) => {
-  console.log('[SESSION] Attempting to resume:', { sessionId, userId });
   const result = await query(
     `UPDATE focus_sessions 
-     SET status = 'ongoing', start_time = NOW()
+     SET status = 'ongoing', end_time = NOW()
      WHERE id = $1 AND user_id = $2 AND status = 'paused' 
      RETURNING *, EXTRACT(EPOCH FROM target_time) AS target_time_secs, EXTRACT(EPOCH FROM remaining_time) AS remaining_time_secs`,
     [sessionId, userId]
   );
-  console.log('[SESSION] Resume query returned', result.rows.length, 'rows');
   if (result.rows.length === 0) {
-    console.log('[SESSION] ERROR: Session not found or not paused');
     throw new Error('Session not found or cannot be resumed');
   }
-  console.log('[SESSION] Resumed:', { sessionId, target_time_secs: result.rows[0].target_time_secs, remaining_time_secs: result.rows[0].remaining_time_secs });
   await updateMemberStatus(sessionId, userId, 'active');
   return formatSessionRow(result.rows[0]);
 };

@@ -17,7 +17,7 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
       targetSeconds,
       startedAt,
       originalTargetSeconds: targetSeconds,
-      remainingSeconds: targetSeconds, // ✅ FIXED (was undefined before)
+      remainingSeconds: targetSeconds, 
     });
 
     setMembers((prev) =>
@@ -32,7 +32,6 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
 
               originalTargetSeconds: targetSeconds,
 
-              // IMPORTANT: do NOT use as truth source
               remainingSeconds: null,
             }
           : m
@@ -109,10 +108,10 @@ export const useTimerHandlers = (roomId, user, sessionId, setSessionId, setSessi
 
     send('timer:start', {
       userId: user.id,
-      targetSeconds: originalTargetSeconds,
+      targetSeconds: remainingSeconds,
       startedAt,
       originalTargetSeconds,
-      remainingSeconds: originalTargetSeconds,
+      remainingSeconds,
     });
 
     return startedAt;

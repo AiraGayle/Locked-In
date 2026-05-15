@@ -61,8 +61,16 @@ const getRoomById = async (roomId, userId) => {
 
   const membersResult = await query(
     `SELECT rm.role, rm.status, u.id AS user_id, u.username, u.avatar_url,
-            fs.id AS session_id, fs.start_time, 
-            EXTRACT(EPOCH FROM fs.target_time) AS target_seconds,
+            fs.id AS session_id,
+            CASE
+              WHEN fs.status = 'ongoing' THEN COALESCE(fs.end_time, fs.start_time)
+              ELSE fs.start_time
+            END AS start_time,
+            EXTRACT(EPOCH FROM CASE
+              WHEN fs.status = 'ongoing' THEN fs.remaining_time
+              ELSE fs.target_time
+            END) AS target_seconds,
+            EXTRACT(EPOCH FROM fs.target_time) AS original_target_seconds,
             EXTRACT(EPOCH FROM fs.remaining_time) AS remaining_seconds,
             fs.status AS session_status
      FROM room_members rm
@@ -78,6 +86,7 @@ const getRoomById = async (roomId, userId) => {
     ...member,
     session_id: member.session_id,
     targetSeconds: member.target_seconds || null,
+    originalTargetSeconds: member.original_target_seconds || null,
     remainingSeconds: member.remaining_seconds || null,
     startedAt: member.start_time ? new Date(member.start_time).getTime() : null,
     sessionStatus: member.session_status
