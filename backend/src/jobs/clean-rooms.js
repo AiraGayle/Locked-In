@@ -26,14 +26,14 @@ const closeEmptyRooms = async () => {
 };
 
 const startCleanRoomsJob = () => {
-  cron.schedule('*/5 * * * *', async () => {
+  cron.schedule('0 * * * *', async () => {
     console.log('[cron] Running CleanRooms job...');
     await closeEmptyRooms();
   }, {
     timezone: 'Asia/Manila'
   });
 
-  console.log('[cron] CleanRooms job scheduled (every 5 minutes)');
+  console.log('[cron] CleanRooms job scheduled (every hour)');
 };
 
 export { startCleanRoomsJob };
