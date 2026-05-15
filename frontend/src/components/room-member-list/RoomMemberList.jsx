@@ -8,43 +8,33 @@ const MemberTimer = ({ startedAt, targetSeconds, remainingSeconds, isPaused }) =
   const safeNumber = (value) =>
     value != null && !Number.isNaN(Number(value)) ? Number(value) : 0;
 
-  const getPausedValue = () =>
-    safeNumber(remainingSeconds != null ? remainingSeconds : targetSeconds);
+  const getBase = () => safeNumber(remainingSeconds != null ? remainingSeconds : targetSeconds);
 
   const [secondsLeft, setSecondsLeft] = useState(() => {
-    if (isPaused) return getPausedValue();
-    if (!targetSeconds) return 0;
-    if (startedAt) {
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      return Math.max(0, safeNumber(targetSeconds) - elapsed);
-    }
-    return 0;
+    if (isPaused) return getBase();
+    if (!startedAt) return 0;
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    return Math.max(0, getBase() - elapsed);
   });
 
-  // Effect 1: update display when paused state changes.
-  // Kept separate from the interval effect so syncing remainingSeconds from DB
-  // does NOT restart the countdown interval (which caused the "faster" bug).
   useEffect(() => {
     if (isPaused) {
-      setSecondsLeft(getPausedValue());
+      setSecondsLeft(getBase());
     }
   }, [isPaused, remainingSeconds, targetSeconds]);
 
-  // Effect 2: countdown interval — recalc from startedAt each tick so
-  // watcher views stay real-time and adjust cleanly on pause/resume updates.
   useEffect(() => {
-    if (!targetSeconds || isPaused) return;
-    if (!startedAt) return;
+    if (isPaused || !startedAt) return;
 
     const update = () => {
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      setSecondsLeft(Math.max(0, Number(targetSeconds) - elapsed));
+      setSecondsLeft(Math.max(0, getBase() - elapsed));
     };
 
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [startedAt, targetSeconds, isPaused]);
+  }, [startedAt, remainingSeconds, targetSeconds, isPaused]);
 
   return <span className="member-timer">{formatDuration(secondsLeft)}</span>;
 };
