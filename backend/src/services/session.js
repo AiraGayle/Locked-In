@@ -49,6 +49,11 @@ const resumeSession = async ({ sessionId, userId }) => {
     [sessionId, userId]
   );
   if (result.rows.length === 0) throw new Error('Session not found or cannot be resumed');
+  console.log('[RESUME] Session resumed:', {
+    sessionId,
+    target_time_secs: result.rows[0].target_time_secs,
+    remaining_time_secs: result.rows[0].remaining_time_secs,
+  });
   await updateMemberStatus(sessionId, userId, 'active');
   return formatSessionRow(result.rows[0]);
 };
@@ -131,6 +136,28 @@ const getSessionStats = async (userId) => {
      WHERE user_id = $1 AND status = $2`,
     [userId, completed_session_status]
   );
+  
+  const allSessions = await query(
+    `SELECT id, target_time, status, EXTRACT(EPOCH FROM target_time) AS target_time_secs
+     FROM focus_sessions
+     WHERE user_id = $1`,
+    [userId]
+  );
+  console.log('[STATS] All sessions for user:', {
+    userId,
+    totalSessions: allSessions.rows.length,
+    completedSessions: allSessions.rows.filter(s => s.status === 'completed').length,
+    sessions: allSessions.rows.map(s => ({
+      id: s.id,
+      status: s.status,
+      target_time_secs: s.target_time_secs,
+    })),
+  });
+  console.log('[STATS] Total focus time:', {
+    sessions_completed: totals.rows[0].sessions_completed,
+    total_focus_time_seconds: totals.rows[0].total_focus_time_seconds,
+  });
+  
   const daily = await query(
      `WITH week AS (
        SELECT generate_series(
