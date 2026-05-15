@@ -59,9 +59,11 @@ const App = () => {
   };
 
   const handleUserUpdate = (updatedFields) => {
-    const updated = { ...user, ...updatedFields };
-    sessionStorage.setItem('user', JSON.stringify(updated));
-    setUser(updated);
+    setUser((prev) => {
+      const updated = { ...prev, ...updatedFields };
+      sessionStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   if (path === '/forgot-password') {
